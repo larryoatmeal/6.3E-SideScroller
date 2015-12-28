@@ -1,13 +1,10 @@
 # 6.3E-SideScroller
-We'll be using python 2.7 https://www.python.org/download/releases/2.7/
+Installing can be a pain
 
-Install http://www.pygame.org/download.shtml, download the 2.7 version
+Read through this to setup
+http://programarcadegames.com/index.php?chapter=foreword&lang=en#section_0
 
-Then run 
+Run
 ```
-python demo.py 
-```
-You may have to run the 32bit version of python
-```
-python2.7-32 demo.py 
+python3 demo.py
 ```
