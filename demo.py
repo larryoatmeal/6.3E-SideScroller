@@ -22,9 +22,9 @@ pygame.display.set_caption("NEXT 3E")
 keepGoing = True
 clock = pygame.time.Clock()
 
-# Fonts (font, size, bold, italics) Not working right now
-# font = pygame.font.SysFont('Calibri', 25, True, False)
-# Render text (text, anti-aliasing, color)
+# # Fonts (font, size, bold, italics) Not working right now
+# font = pygame.font.SysFont('Courier New', 25, True, False)
+# # Render text (text, anti-aliasing, color)
 # text = font.render("6.3E", True, BLACK)
 
 #Event keys
@@ -60,8 +60,11 @@ class World(Entity):
 		self._entities = []
 		self._listeners = []
 		self._eventQueue = []
-		self._players = [] #a player is an entity that responds to key commands
+		self._players = []#a player is an entity that responds to key commands
 		#YOUR OWN WORLD PARAMS HERE
+
+		#commonly accessed parameters here
+		self.player_position = None
 
 	#--STUDENTS CAN IMPLEMENT THIS---------------------#
 	# Most logic should be contained in the children of the world, not the world itself
@@ -93,6 +96,7 @@ class World(Entity):
 			entity.update(self, dt)
 		for player in self._players:
 			player.update(self, dt)
+			self.player_position = (player.x, player.y)
 	#draw children
 	def draw(self, screen):
 		self.world_draw(screen)
@@ -280,11 +284,33 @@ def testDraw(screen):
 		y = int(3*UNIT*math.cos(x/(4*UNIT))) + 10*UNIT
 		pygame.draw.line(screen, RED, [x, y], [x + 1, y])
 
+class Panda(Entity):
+	def __init__(self, assets):
+		self.assets = assets
+		self.x = 0
+		self.y = 0
+	def draw(self, screen):
+		screen.blit(assets.panda, toPix([self.x, self.y]))
+	def update(self, world, dt):
+		# print(world.player_position)
+		if(world.player_position):
+			self.x += 0.1 * (world.player_position[0] - self.x)
+			self.y += 0.1 * (world.player_position[1] - self.y)
+
+class AssetManager:
+	def __init__(self):
+		self.panda = pygame.image.load("assets/images/panda.png").convert_alpha()
+		# print(self.panda)
+assets = AssetManager()
+
+
 world = World()
 player = Player()
 rainDrops = RainDrops()
+panda = Panda(assets)
 world.addPlayer(player)
 world.addEntity(rainDrops)
+world.addEntity(panda)
 world.addListener(rainDrops)
 
 #Main loop
@@ -305,11 +331,11 @@ while keepGoing:
 	deltaTime = clock.get_time()
 	world.update(deltaTime)
 
+
 	# Draw world
 	screen.fill(LAVENDAR) #need to clear screen on each Draw
 	# testDraw(screen)
 	world.draw(screen)
-
 	# Display
 	pygame.display.flip() 
 	clock.tick(60) #60 fps
