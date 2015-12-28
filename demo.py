@@ -166,13 +166,16 @@ class RainDrops(Entity):
 					coord[2] = -10
 				else:
 					coord[2] = 10
-			randIndex = random.randrange(0, 3)
-			self.color[randIndex] = random.randrange(0, 255) 
+			randIndex = random.randrange(0, 2)#only deal with R and G
+			self.color[randIndex] = random.randrange(150, 255) 
 
 
 class Player(Entity):
 	FRICTION = 2/1000.0
 	FORCE = 0.05/1000.0
+	COLOR_A = (255, 0, 100)
+	COLOR_B = (0, 255, 170)
+	TRANSITION_PERIOD = 10000 #10000 ms = 10s
 
 	def __init__(self):
 		self.x = 5 #world units
@@ -186,6 +189,10 @@ class Player(Entity):
 
 		self.a_x = 0
 		self.a_y = 0
+
+		self.time = 0
+		self.gradient_scale = 0
+		self.color = list(Player.COLOR_A)
 	# def getBoundingRectangle(self):
 	# 	return [self.x, self.y, self.x + self.width, self.y + self.height]
 	def onKeyDown(self, keyPressed):
@@ -207,7 +214,7 @@ class Player(Entity):
 	# 	return [int((self.x + self.width)*UNIT/2.0), int((self.y + self.height)*UNIT/2.0)]
 	def draw(self, screen):
 		rect = toPix([self.x, self.y, self.w, self.h])
-		pygame.draw.rect(screen, WHITE, rect)
+		pygame.draw.rect(screen, self.color, rect)
 
 
 	def doRectsOverlap(self, rect1, rect2):
@@ -246,6 +253,16 @@ class Player(Entity):
 		self.y += self.v_y * dt
 		self.checkCollision(world)
 
+		self.time = (self.time + dt) % Player.TRANSITION_PERIOD
+		self.gradient_scale = (math.cos(self.time*2*math.pi/Player.TRANSITION_PERIOD) + 1)/2
+
+
+		for i in range(0, 3):
+			mix = self.gradient_scale*Player.COLOR_A[i] + (1-self.gradient_scale)*Player.COLOR_B[i]
+			self.color[i] = clamp(mix, 0, 255)
+
+def clamp(x, low, high):
+	return max(low, min(x, high))
 
 def toPix(coord):
 	pixCoords = []
@@ -290,7 +307,7 @@ while keepGoing:
 
 	# Draw world
 	screen.fill(LAVENDAR) #need to clear screen on each Draw
-	testDraw(screen)
+	# testDraw(screen)
 	world.draw(screen)
 
 	# Display
