@@ -27,17 +27,8 @@ clock = pygame.time.Clock()
 # Render text (text, anti-aliasing, color)
 # text = font.render("6.3E", True, BLACK)
 
-#initialize rainDrops
-RAIN_DIAMETER = int(UNIT/8)
-RAIN_SPEED = 2*UNIT#in units per second
-NUM_RAIN_DROPS = 100
-rainDrops = []
-for i in range(NUM_RAIN_DROPS):
-	x = random.randrange(RAIN_DIAMETER, WIDTH - RAIN_DIAMETER)
-	y = random.randrange(RAIN_DIAMETER, HEIGHT - RAIN_DIAMETER)	
-
-	rainDrops.append([x,y])
-
+#Event keys
+WALL_COLLISION = "PLAYER COLLIDED WITH WALL"
 
 
 class Entity:
@@ -84,6 +75,8 @@ class World(Entity):
 		pass
 	def world_onEvent(self, event):
 		#YOUR CODE HERE
+		print("EVENT:" + event.key)
+
 		return False
 	def world_keyUp(self, event):
 		#YOUR CODE HERE
@@ -94,6 +87,7 @@ class World(Entity):
 
 	#--STUDENTS PROBABLY DO NOT NEED TO MODIFY THIS, BUT CAN OVERRIDE IF NECESSARY---------------------#		
 	def update(self, dt):
+		self.notifyListeners()
 		self.world_update(dt)	
 		for entity in self._entities:
 			entity.update(self, dt)
@@ -113,6 +107,7 @@ class World(Entity):
 					consumed = listener.onEvent(event)
 					if(consumed):#if consumed by child, stop trickling down
 						break
+		self._eventQueue = []
 	#register an Entity as part of this world
 	def addEntity(self, entity):
 		self._entities.append(entity)
@@ -139,6 +134,41 @@ class World(Entity):
 		self.world_keyDown(keyCode)
 		for player in self._players:
 			player.onKeyDown(keyCode)
+
+class RainDrops(Entity):
+	RAIN_DIAMETER = 1.0/8
+	RAIN_SPEED = 2#in units per second
+	NUM_RAIN_DROPS = 100
+	def __init__(self):
+		self.rainDrops = []
+		for i in range(RainDrops.NUM_RAIN_DROPS):
+			x = random.uniform(0, WORLD_WIDTH)
+			y = random.uniform(0, WORlD_HEIGHT)
+			v_x = 0	
+			self.color = list(BLUE)
+			self.rainDrops.append([x,y,v_x])
+	def update(self, world, dt):
+		for coord in self.rainDrops:
+			coord[1] += RainDrops.RAIN_SPEED*dt/1000.0
+			coord[0] += coord[2] * dt/1000.0
+			coord[2] *= 0.9
+			if coord[1] > WORlD_HEIGHT:
+				coord[1] = -RainDrops.RAIN_DIAMETER
+				coord[0] = random.uniform(0, WORLD_WIDTH)
+	def draw(self, screen):
+		for coord in self.rainDrops:
+			pygame.draw.circle(screen, self.color, toPix(coord[:2]), 1)
+	def onEvent(self, event):
+		if(event.key == WALL_COLLISION):
+			#push raindrops
+			for coord in self.rainDrops:
+				if(random.randrange(0, 2) == 1):
+					coord[2] = -10
+				else:
+					coord[2] = 10
+			randIndex = random.randrange(0, 3)
+			self.color[randIndex] = random.randrange(0, 255) 
+
 
 class Player(Entity):
 	FRICTION = 2/1000.0
@@ -198,43 +228,31 @@ class Player(Entity):
 
 		return True
 
-	def checkCollision(self):
+	def checkCollision(self, world):
 		worldBoundaries = [self.w, self.h, WORLD_WIDTH-self.w, WORlD_HEIGHT-self.h]
 		playerBoundaries = [self.x, self.y, self.w, self.h]
 		if not self.doRectsOverlap(worldBoundaries, playerBoundaries):
-			print("Collision with wall")
+			world.publishEvent(Event(WALL_COLLISION))
 			# if(self.x < 0 or self.x > WORLD_WIDTH-self.w):#left/right wall collision
 			self.v_y = -1.2*self.v_y
 
 			# if(self.y < 0 or self.y > WORlD_HEIGHT-self.h):#up/down wall collision
 			self.v_x = -1.2*self.v_x
 
-
-
 	def update(self, world, dt):
 		self.v_x += (self.a_x - self.v_x * Player.FRICTION) * dt
 		self.v_y += (self.a_y - self.v_y * Player.FRICTION) * dt
 		self.x += self.v_x * dt
 		self.y += self.v_y * dt
-		self.checkCollision()
+		self.checkCollision(world)
 
-def updateRainDrops(dt):
-	# Update world
-	for coord in rainDrops:
-		coord[1] += RAIN_SPEED*dt/1000.0
-		if coord[1] > HEIGHT:
-			coord[1] = -RAIN_DIAMETER
-def integerize(coord):
-	return list(map(lambda x: int(x), coord))
+
 def toPix(coord):
 	pixCoords = []
 	for i in coord:
 		pixCoords.append(int(UNIT * i))
 	return pixCoords
-def drawBackground(screen):
-	# Draw rain
-	for coord in rainDrops:
-		pygame.draw.circle(screen, BLUE, integerize(coord), RAIN_DIAMETER)
+def testDraw(screen):
 	#Draw rectangle
 	pygame.draw.rect(screen, RED, [UNIT*3, UNIT*3, UNIT*5, UNIT*5])
 	#Draw line
@@ -247,8 +265,10 @@ def drawBackground(screen):
 
 world = World()
 player = Player()
+rainDrops = RainDrops()
 world.addPlayer(player)
-
+world.addEntity(rainDrops)
+world.addListener(rainDrops)
 
 #Main loop
 while keepGoing:
@@ -259,32 +279,22 @@ while keepGoing:
 		elif event.type == pygame.KEYDOWN:
 			# handle keydown
 			world.onKeyDown(event.key)
-			print("KEYDOWN", event.key)
-			if event.key == 113:#q
+			if event.key == pygame.K_q:#q
 				keepGoing = False
-
 		elif event.type == pygame.KEYUP:
 			# handle keyup
 			world.onKeyUp(event.key)
-
-			print("KEYUP")
 	#Update world
-
 	deltaTime = clock.get_time()
-
-	updateRainDrops(deltaTime)
 	world.update(deltaTime)
+
 	# Draw world
 	screen.fill(LAVENDAR) #need to clear screen on each Draw
-	drawBackground(screen)
+	testDraw(screen)
 	world.draw(screen)
-
-	# Draw text
-	# screen.blit(text, [0, 0])
 
 	# Display
 	pygame.display.flip() 
 	clock.tick(60) #60 fps
-
 
 pygame.quit()
