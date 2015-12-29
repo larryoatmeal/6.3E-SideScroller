@@ -1,10 +1,10 @@
 
 class Entity:
-	def __init__(self):
+	def __init__(self, world):
+		self.world = world
+	def draw(self, screen, cam):
 		pass
-	def draw(self, screen):
-		pass
-	def update(self, world, dt):
+	def update(self, dt):
 		pass
 	#Returns true if event is 'consumed', i.e., no one downstream will receive the event
 	def onEvent(self, event):
@@ -33,7 +33,7 @@ class World(Entity):
 
 		#commonly accessed parameters here
 		self.player_position = None
-
+		self.camera = None
 	#--STUDENTS CAN IMPLEMENT THIS---------------------#
 	# Most logic should be contained in the children of the world, not the world itself
 	# (The children will be automatically handled by this class itself)
@@ -57,21 +57,28 @@ class World(Entity):
 		pass
 
 	#--STUDENTS PROBABLY DO NOT NEED TO MODIFY THIS, BUT CAN OVERRIDE IF NECESSARY---------------------#		
+
+	def cameraFollowPlayer(self):
+		#can make this more complicated
+		self.camera.pos = self.player_position
+
 	def update(self, dt):
 		self.notifyListeners()
 		self.world_update(dt)	
 		for entity in self._entities:
-			entity.update(self, dt)
+			entity.update(dt)
 		for player in self._players:
-			player.update(self, dt)
+			player.update(dt)
 			self.player_position = (player.x, player.y)
+			if self.camera:#can add flag to change this
+				self.cameraFollowPlayer()
 	#draw children
 	def draw(self, screen):
 		self.world_draw(screen)
 		for entity in self._entities:
-			entity.draw(screen)
+			entity.draw(screen, self.camera)
 		for player in self._players:
-			player.draw(screen)
+			player.draw(screen, self.camera)
 	def notifyListeners(self):
 		for event in self._eventQueue:
 			if not self.world_onEvent(event):#if not consumed by world, give to children
@@ -106,4 +113,6 @@ class World(Entity):
 		self.world_keyDown(keyCode)
 		for player in self._players:
 			player.onKeyDown(keyCode)
+	def setCamera(self, cam):
+		self.camera = cam
 

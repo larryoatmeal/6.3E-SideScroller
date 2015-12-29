@@ -1,5 +1,7 @@
 import sys, pygame, math, random
 from base_classes import *
+from sprite import Sprite
+from camera import Camera
 pygame.init()
 
 # Colors
@@ -208,6 +210,20 @@ world.addPlayer(player)
 world.addEntity(rainDrops)
 world.addEntity(panda)
 world.addListener(rainDrops)
+
+#------------------NEW
+cam = Camera(WIDTH, HEIGHT, WORLD_WIDTH)
+
+class Grass(Sprite):
+	pass
+
+for x in range(10, 50, 5):
+	for y in range(10, 30, 5):
+		grass = Grass(world, (x,y), (1,1))
+		world.addEntity(grass)
+world.setCamera(cam)
+#--------------------
+
 
 #Main loop
 while keepGoing:
