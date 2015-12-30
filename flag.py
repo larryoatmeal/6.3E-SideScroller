@@ -1,2 +1,0 @@
-#flags for entities
-COLLIDABLE_WITH_PLAYER = "COLLIDABLE_WITH_PLAYER"

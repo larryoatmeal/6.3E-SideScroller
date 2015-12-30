@@ -1,4 +1,8 @@
 from base_classes import *
+
+#This is not very elegant
+#Maybe just have the default event contain a dictionary that people can put whatever into
+
 PLAY_NOTE = "PLAY_NOTE"
 class NoteEvent(Event):
 	def __init__(self, note):
@@ -7,6 +11,8 @@ class NoteEvent(Event):
 
 PLAYER_COLLIDED_APPLY_PHYSICS = "PLAYER_COLLIDED_APPLY_PHYSICS"
 
+
+WALL_COLLISION = "PLAYER COLLIDED WITH WALL"
 
 SET_COLOR = "SET_COLOR"
 class SetColorEvent(Event):

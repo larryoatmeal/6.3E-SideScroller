@@ -2,7 +2,7 @@ from pygame import Rect
 from collections import namedtuple
 
 #Maintains aspect ratio at all times
-Vector = namedtuple('Vector', ['x', 'y'])
+# Vector = namedtuple('Vector', ['x', 'y'])
 # class Vector(list):
 # 	def __init__(self, x, y):
 # 		self.x = x
@@ -13,8 +13,8 @@ Vector = namedtuple('Vector', ['x', 'y'])
 # 		return "Vector(x = {}, y = {})".format(self.x, self.y)
 # 	def __iter__(self):
 # 		return iter([self.x, self.y])
-def subVector(v1, v2):
-	return Vector(v1.x - v2.x, v1.y - v2.y)
+# def subVector(v1, v2):
+# 	return Vector(v1.x - v2.x, v1.y - v2.y)
 
 class Camera:
 	#pixW: actual width of screen in pixels

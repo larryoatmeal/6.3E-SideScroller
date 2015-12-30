@@ -1,6 +1,8 @@
-import sys, pygame, math, random
+import sys, pygame, math, random, EventLib
 from base_classes import *
 pygame.init()
+
+#demo2.py is probably more useful to look at
 
 # Colors
 BLACK = (0 , 0, 0 )
@@ -28,10 +30,6 @@ clock = pygame.time.Clock()
 # # Render text (text, anti-aliasing, color)
 # text = font.render("6.3E", True, BLACK)
 
-#Event keys
-WALL_COLLISION = "PLAYER COLLIDED WITH WALL"
-
-
 class RainDrops(Entity):
 	RAIN_DIAMETER = 1.0/8
 	RAIN_SPEED = 2#in units per second
@@ -57,7 +55,7 @@ class RainDrops(Entity):
 		for coord in self.rainDrops:
 			pygame.draw.circle(screen, self.color, toPix(coord[:2]), 1)
 	def onEvent(self, event):
-		if(event.key == WALL_COLLISION):
+		if(event.key == EventLib.WALL_COLLISION):
 			#push raindrops
 			for coord in self.rainDrops:
 				if(random.randrange(0, 2) == 1):
@@ -138,7 +136,7 @@ class Player(Entity):
 		worldBoundaries = [self.w, self.h, WORLD_WIDTH-self.w, WORlD_HEIGHT-self.h]
 		playerBoundaries = [self.x, self.y, self.w, self.h]
 		if not self.doRectsOverlap(worldBoundaries, playerBoundaries):
-			world.publishEvent(Event(WALL_COLLISION))
+			world.publishEvent(Event(EventLib.WALL_COLLISION))
 			# if(self.x < 0 or self.x > WORLD_WIDTH-self.w):#left/right wall collision
 			self.v_y = -1.2*self.v_y
 

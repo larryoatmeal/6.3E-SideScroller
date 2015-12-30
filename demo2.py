@@ -1,8 +1,6 @@
 import sys, pygame, math, random
 from base_classes import *
-from sprite import Sprite, Player
 from camera import Camera
-import flag
 import EventLib
 
 pygame.init()
@@ -18,27 +16,85 @@ WIDTH = 480
 HEIGHT = 320
 UNIT = 16
 
-WORLD_WIDTH = int(WIDTH / UNIT)
+WORLD_WIDTH = int(WIDTH / UNIT) #width of screen in world units
 WORlD_HEIGHT = int(HEIGHT / UNIT)
-MAP_WIDTH = 2 * WORLD_WIDTH
+MAP_WIDTH = 2 * WORLD_WIDTH #width of entire map in world units
 MAP_HEIGHT = 2 * WORlD_HEIGHT
 
 size = (WIDTH, HEIGHT)
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("NEXT 3E")
 
-# Main loop
-keepGoing = True
-clock = pygame.time.Clock()
 
 # # Fonts (font, size, bold, italics) Not working right now
 # font = pygame.font.SysFont('Courier New', 25, True, False)
 # # Render text (text, anti-aliasing, color)
 # text = font.render("6.3E", True, BLACK)
 
-# Event keys
-WALL_COLLISION = "PLAYER COLLIDED WITH WALL"
 
+#-------------------------------Convenience methods------------------------------
+def sign(x):
+    if x >= 0:
+        return 1
+    else:
+        return -1
+
+def clamp(x, low, high):
+    return max(low, min(x, high))
+
+def doRectsOverlap(rect1, rect2):
+    topLeft1 = (rect1[0], rect1[1])
+    topLeft2 = (rect2[0], rect2[1])
+    bottomRight1 = (topLeft1[0] + rect1[2], topLeft1[1] + rect1[3])
+    bottomRight2 = (topLeft2[0] + rect2[2], topLeft2[1] + rect2[3])
+
+    # print(topLeft1, bottomRight1, topLeft2, bottomRight2)
+    if (topLeft1[0] > bottomRight2[0] or topLeft2[0] > bottomRight1[0]):
+        # print("HERE")
+        return False
+    if (topLeft1[1] > bottomRight2[1] or topLeft2[1] > bottomRight1[1]):
+        # print("HERE2")
+        return False
+    return True
+def doSpritesOverlap(sprite1, sprite2):
+    return doRectsOverlap(sprite1.getRect(), sprite2.getRect())
+
+
+def testDraw(screen):
+    # Draw rectangle
+    pygame.draw.rect(screen, RED, [UNIT * 3, UNIT * 3, UNIT * 5, UNIT * 5])
+    # Draw line
+    pygame.draw.line(screen, RED, [0, 0], [UNIT * 29, UNIT * 19], 5)
+    # Draw sinusoid
+    for i in range(2 * UNIT, 25 * UNIT):
+        x = i
+        y = int(3 * UNIT * math.cos(x / (4 * UNIT))) + 10 * UNIT
+        pygame.draw.line(screen, RED, [x, y], [x + 1, y])
+
+#-----------------------------Helper classes---------------------------------
+
+class AssetManager:
+    def __init__(self):
+        self.panda = pygame.image.load("assets/images/panda.png").convert_alpha()
+        self.squash = pygame.image.load("assets/images/delicata_squash.png").convert_alpha()
+    # print(self.panda)
+
+class TimeBomb:
+    def __init__(self, time, f, bombContainer):
+        self.timeSinceSetOff = 0
+        self.time = time
+        self.f = f
+        self.bombContainer = bombContainer
+
+    def tick(self, dt):
+        self.timeSinceSetOff += dt
+        if self.timeSinceSetOff > self.time:
+            self.f()
+            if self in self.bombContainer:
+                self.bombContainer.remove(self)
+
+
+#-------------------------------Entities methods------------------------------
 
 class RainDrops(Entity):
     RAIN_DIAMETER = 1.0 / 8
@@ -66,10 +122,11 @@ class RainDrops(Entity):
 
     def draw(self, screen, camera):
         for coord in self.rainDrops:
-            pygame.draw.circle(screen, self.color, toPix(coord[:2]), 1)
+            #note this class does not obey camera
+            pygame.draw.circle(screen, self.color, (int(coord[0] * UNIT), int(coord[1] * UNIT)), 1)
 
     def onEvent(self, event):
-        if (event.key == WALL_COLLISION):
+        if (event.key == EventLib.WALL_COLLISION):
             # push raindrops
             for coord in self.rainDrops:
                 if (random.randrange(0, 2) == 1):
@@ -78,21 +135,6 @@ class RainDrops(Entity):
                     coord[2] = 10
             randIndex = random.randrange(0, 3)
             self.color[randIndex] = random.randrange(20, 255)
-
-
-class TimeBomb:
-    def __init__(self, time, f, bombContainer):
-        self.timeSinceSetOff = 0
-        self.time = time
-        self.f = f
-        self.bombContainer = bombContainer
-
-    def tick(self, dt):
-        self.timeSinceSetOff += dt
-        if self.timeSinceSetOff > self.time:
-            self.f()
-            if self in self.bombContainer:
-                self.bombContainer.remove(self)
 
 class SquarePlayer(Player):
     FRICTION = 2 / 1000.0
@@ -117,7 +159,7 @@ class SquarePlayer(Player):
         self.timeBombs = set()
         self.flinched = False
     # def getBoundingRectangle(self):
-    # 	return [self.x, self.y, self.x + self.width, self.y + self.height]
+    #   return [self.x, self.y, self.x + self.width, self.y + self.height]
     def onKeyDown(self, keyPressed):
         print("SquarePlayer received key down", keyPressed)
         if keyPressed == pygame.K_d:
@@ -136,7 +178,7 @@ class SquarePlayer(Player):
             self.a_y = 0
 
     # def centerPix(self):
-    # 	return [int((self.x + self.width)*UNIT/2.0), int((self.y + self.height)*UNIT/2.0)]
+    #   return [int((self.x + self.width)*UNIT/2.0), int((self.y + self.height)*UNIT/2.0)]
     def draw(self, screen, camera):
         pygame.draw.rect(screen, self.color, camera.transform(self.getRect()))
 
@@ -145,7 +187,7 @@ class SquarePlayer(Player):
         worldBoundaries = [self.w, self.h, MAP_WIDTH - self.w, MAP_HEIGHT - self.h]
         SquarePlayerBoundaries = [self.x, self.y, self.w, self.h]
         if not doRectsOverlap(worldBoundaries, SquarePlayerBoundaries):
-            world.publishEvent(Event(WALL_COLLISION))
+            world.publishEvent(Event(EventLib.WALL_COLLISION))
             # if(self.x < 0 or self.x > WORLD_WIDTH-self.w):#left/right wall collision
             REBOUND = 1.2
             self.v_y = -REBOUND * self.v_y
@@ -195,35 +237,6 @@ class SquarePlayer(Player):
     def onCollide(self, entity):
         entity.onEvent(EventLib.SetColorEvent(self.color))
 
-def sign(x):
-    if x >= 0:
-        return 1
-    else:
-        return -1
-
-def clamp(x, low, high):
-    return max(low, min(x, high))
-
-
-def toPix(coord):
-    pixCoords = []
-    for i in coord:
-        pixCoords.append(int(UNIT * i))
-    return pixCoords
-
-
-def testDraw(screen):
-    # Draw rectangle
-    pygame.draw.rect(screen, RED, [UNIT * 3, UNIT * 3, UNIT * 5, UNIT * 5])
-    # Draw line
-    pygame.draw.line(screen, RED, [0, 0], [UNIT * 29, UNIT * 19], 5)
-    # Draw sinusoid
-    for i in range(2 * UNIT, 25 * UNIT):
-        x = i
-        y = int(3 * UNIT * math.cos(x / (4 * UNIT))) + 10 * UNIT
-        pygame.draw.line(screen, RED, [x, y], [x + 1, y])
-
-
 class Panda(Sprite):
     def __init__(self, world, pos, dim, assets):
         super().__init__(world, pos, dim)
@@ -238,31 +251,32 @@ class Panda(Sprite):
             self.x += 0.1 * (world.player_position[0] - self.x)
             self.y += 0.1 * (world.player_position[1] - self.y)
 
-class AssetManager:
+class MusicPlayer:
     def __init__(self):
-        self.panda = pygame.image.load("assets/images/panda.png").convert_alpha()
-        self.squash = pygame.image.load("assets/images/delicata_squash.png").convert_alpha()
-    # print(self.panda)
+        pass
 
+    def onEvent(self, event):
+        pass
 
-assets = AssetManager()
+    def playNote(self, note):
+        pass
 
-def doRectsOverlap(rect1, rect2):
-    topLeft1 = (rect1[0], rect1[1])
-    topLeft2 = (rect2[0], rect2[1])
-    bottomRight1 = (topLeft1[0] + rect1[2], topLeft1[1] + rect1[3])
-    bottomRight2 = (topLeft2[0] + rect2[2], topLeft2[1] + rect2[3])
+class SquareTile(Sprite):
+    def __init__(self, world, pos, dim):
+        super().__init__(world, pos, dim)
+        self.color = [255, 30, 50]
 
-    # print(topLeft1, bottomRight1, topLeft2, bottomRight2)
-    if (topLeft1[0] > bottomRight2[0] or topLeft2[0] > bottomRight1[0]):
-        # print("HERE")
-        return False
-    if (topLeft1[1] > bottomRight2[1] or topLeft2[1] > bottomRight1[1]):
-        # print("HERE2")
-        return False
-    return True
-def doSpritesOverlap(sprite1, sprite2):
-    return doRectsOverlap(sprite1.getRect(), sprite2.getRect())
+    def draw(self, screen, cam):
+        pygame.draw.rect(screen, self.color, cam.transform(self.getRect()))
+    def onEvent(self, event):
+        if event.key == EventLib.SET_COLOR:
+            self.color = event.color.copy()
+    def onCollide(self, player):
+        # message player directly
+        # player.onEvent(Event(EventLib.PLAYER_COLLIDED_APPLY_PHYSICS))
+        # tell world
+        pass
+        # self.world.publishEvent(EventLib.NoteEvent(60))
 
 class MyWorld(World):
     def __init__(self):
@@ -296,10 +310,6 @@ class MyWorld(World):
         self.camera.pos[0] = clamp(self.player_position[0] - WORLD_WIDTH/2, 0, MAP_WIDTH - WORLD_WIDTH)
         self.camera.pos[1] = clamp(self.player_position[1] - WORlD_HEIGHT/2, 0, MAP_HEIGHT- WORlD_HEIGHT)
 
-
-
-        # if self.player_position[0]
-
     def world_update(self, dt):
         super().world_update(dt)
         #handle collisions here
@@ -320,6 +330,8 @@ class MyWorld(World):
                         pass
                         # print("Sprite does not have onCollide method")
 
+#------------------------Wire up world------------------------------#
+assets = AssetManager()
 world = MyWorld()
 player = SquarePlayer(world, (5, 5), (1, 1))
 rainDrops = RainDrops(world)
@@ -329,50 +341,20 @@ world.addEntity(rainDrops)
 world.addEntity(panda)
 
 world.addListener(rainDrops)
-
-# ------------------NEW
 cam = Camera(WIDTH, HEIGHT, WORLD_WIDTH)
 
-
-class MusicPlayer:
-    def __init__(self):
-        pass
-
-    def onEvent(self, event):
-        pass
-
-    def playNote(self, note):
-        pass
-
-class SquareTile(Sprite):
-    def __init__(self, world, pos, dim):
-        super().__init__(world, pos, dim)
-        self.color = [255, 30, 50]
-
-    def draw(self, screen, cam):
-        pygame.draw.rect(screen, self.color, cam.transform(self.getRect()))
-    def onEvent(self, event):
-        if event.key == EventLib.SET_COLOR:
-            self.color = event.color.copy()
-    def onCollide(self, player):
-        # message player directly
-        # player.onEvent(Event(EventLib.PLAYER_COLLIDED_APPLY_PHYSICS))
-        # tell world
-        pass
-        # self.world.publishEvent(EventLib.NoteEvent(60))
 
 for x in range(10, 50, 5):
     for y in range(10, 30, 5):
         squash = SquareTile(world, (x, y), (1, 1))
         # squash.image = assets.squash
-
         world.addEntity(squash)
         world.addCollidesWithPlayer(squash)
 world.setCamera(cam)
-# --------------------
-
 
 # Main loop
+keepGoing = True
+clock = pygame.time.Clock()
 while keepGoing:
     # Poll for events
     for event in pygame.event.get():
