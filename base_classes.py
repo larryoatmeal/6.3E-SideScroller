@@ -1,4 +1,3 @@
-
 class Entity:
 	def __init__(self, world):
 		self.world = world
@@ -23,10 +22,31 @@ class Event:
 
 #Container of world as well as event manager
 #Since World is an Entity, can have worlds within in worlds, could be messy though
+
+
+
+
+
+# class WorldWithCollision(World):
+# 	def __init__(self):
+# 		super().__init__()
+# 		self._collidesWithPlayer = []
+
+# 	def update(self):
+# 		super().update()
+
+# 	def checkCollisionWithPlayer(self):
+# 		for player in self._players:
+# 			for sprite in self._collidesWithPlayer:
+# 				if player.getRect().collideRect(sprite.getRect()):
+
+
+
+
 class World(Entity):
 	def __init__(self):
-		self._entities = []
-		self._listeners = []
+		self._entities = set()
+		self._listeners = set()
 		self._eventQueue = []
 		self._players = []#a player is an entity that responds to key commands
 		#YOUR OWN WORLD PARAMS HERE
@@ -60,7 +80,8 @@ class World(Entity):
 
 	def cameraFollowPlayer(self):
 		#can make this more complicated
-		self.camera.pos = self.player_position
+		# self.camera.pos = self.player_position
+		pass
 
 	def update(self, dt):
 		self.notifyListeners()
@@ -89,15 +110,23 @@ class World(Entity):
 		self._eventQueue = []
 	#register an Entity as part of this world
 	def addEntity(self, entity):
-		self._entities.append(entity)
+		self._entities.add(entity)
 	#remove entity from this world
 	def removeEntity(self, entity):
-		self._entities.remove(entity)
+		if entity in self._entities:
+			self._entities.remove(entity)
 	#must implement onEvent(event)
 	def addListener(self, listener):
-		self._listeners.append(listener)
+
+		self._listeners.add(listener)
 	def removeListener(self, listener):
-		self._listeners.remove(listener)
+		if listener in self._listeners:
+			self._listeners.remove(listener)
+
+	def removeFromAll(self, obj):
+		self.removeEntity(obj)
+		self.removeListener(obj)
+
 	#event should be an Event class
 	def publishEvent(self, event):
 		self._eventQueue.append(event)

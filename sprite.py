@@ -12,7 +12,7 @@ class Sprite(Entity):
 		self.world = world
 		self.image = None
 	def getRect(self):#lol
-		return Rect(self.x, self.y, self.w, self.h)
+		return [self.x, self.y, self.w, self.h]
 	def getPixelRect(self, cam):
 		return cam.transform(self.getRect())
 	def draw(self, screen, cam):
@@ -24,3 +24,13 @@ class Sprite(Entity):
 	def update(self, dt):
 		pass
 		#can change self.image to change what image is being displayed
+
+
+class Player(Sprite):
+	# def getBoundingRectangle(self):
+	# 	return [self.x, self.y, self.x + self.width, self.y + self.height]
+	def onKeyDown(self, keyPressed):
+		pass
+	def onKeyUp(self, keyPressed):
+		pass
+
