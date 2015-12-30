@@ -192,9 +192,8 @@ class SquarePlayer(Player):
                 self.flinched = True
                 self.timeBombs.add(TimeBomb(100, self.unflinch, self.timeBombs))
 
-    def onCollision(self, entity):
-        pass
-
+    def onCollide(self, entity):
+        entity.onEvent(EventLib.SetColorEvent(self.color))
 
 def sign(x):
     if x >= 0:
@@ -242,7 +241,7 @@ class Panda(Sprite):
 class AssetManager:
     def __init__(self):
         self.panda = pygame.image.load("assets/images/panda.png").convert_alpha()
-
+        self.squash = pygame.image.load("assets/images/delicata_squash.png").convert_alpha()
     # print(self.panda)
 
 
@@ -313,7 +312,7 @@ class MyWorld(World):
                     try:
                         player.onCollide(sprite)
                     except AttributeError:
-                        # print("Player does not have onCollide method")
+                        print("Player does not have onCollide method")
                         pass
                     try:
                         sprite.onCollide(player)
@@ -345,27 +344,30 @@ class MusicPlayer:
     def playNote(self, note):
         pass
 
-class NoteBlock(Sprite):
+class SquareTile(Sprite):
     def __init__(self, world, pos, dim):
         super().__init__(world, pos, dim)
+        self.color = [255, 30, 50]
 
-
+    def draw(self, screen, cam):
+        pygame.draw.rect(screen, self.color, cam.transform(self.getRect()))
     def onEvent(self, event):
-        pass
-
+        if event.key == EventLib.SET_COLOR:
+            self.color = event.color.copy()
     def onCollide(self, player):
         # message player directly
-        player.onEvent(Event(EventLib.PLAYER_COLLIDED_APPLY_PHYSICS))
+        # player.onEvent(Event(EventLib.PLAYER_COLLIDED_APPLY_PHYSICS))
         # tell world
-
-        self.world.publishEvent(EventLib.NoteEvent(60))
-
+        pass
+        # self.world.publishEvent(EventLib.NoteEvent(60))
 
 for x in range(10, 50, 5):
     for y in range(10, 30, 5):
-        note = NoteBlock(world, (x, y), (1, 1))
-        world.addEntity(note)
-        world.addCollidesWithPlayer(note)
+        squash = SquareTile(world, (x, y), (1, 1))
+        # squash.image = assets.squash
+
+        world.addEntity(squash)
+        world.addCollidesWithPlayer(squash)
 world.setCamera(cam)
 # --------------------
 
