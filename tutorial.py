@@ -186,6 +186,65 @@ def part2_5():
 
 '''
 Part 3: Control flow
-ifs, elses, whiles, and fors
+Ifs, elses, whiles, and fors
+Conditionals
 '''
 
+'''
+If statements let you execute your code if a condition is true.
+'''
+
+def part3_1():
+    x = 3
+    # if statements look like this:
+    if x == 3:
+        print('x is 3!')
+    # You can use if statements to check any true/false statement. The one above
+    # checked if x was equal to 3 (using the == operator). There are other
+    # operators, as shown below. Each one either returns True or False.
+    print('Is x greater than 0?', x > 0)
+    print('Is x less than 0?', x < 0)
+    print('Is x - 3 equal to 0?', x - 3 == 0)
+    print('Is x greater than or equal to 3?', x >= 3)
+    print('Is x less than or equal to 3?', x <= 3)
+    print('Is x greater than 2 and less than 5?', x > 2 and x < 5)
+    # To put multiple commands inside an if statement, tab them in, like so:
+    if x == 3:
+        print('Hello!')
+        print('x is 3!')
+    print('This is no longer inside the if statement.')
+
+'''
+You can combine if statements with else statements, and else if (elif)
+statements.
+'''
+
+def part3_2():
+    x = 3
+    # An if-else statement:
+    if x == 3:
+        print('x is 3!')
+    else:
+        print('x is not 3')
+    # And an if-elif-else statement:
+    if x < 0:
+        print('x is negative')
+    elif x < 1:
+        print('0 <= x < 1')
+    elif x < 5:
+        print('1 <= x < 5')
+    else:
+        print('x >= 5')
+
+'''
+Part 4: Making your own functions and classes
+Defining functions
+Using your own defined functions
+Function arguments
+The main function
+Classes and objects
+'''
+
+'''
+Part 5: Comments
+'''
