@@ -1,5 +1,5 @@
 '''
-A complete beginner's intro to Python, using text adventure games.
+A complete beginner's intro to Python.
 By: Felix Sun (fephsun), for 6.3E IAP 2016.
 
 Usage:
@@ -183,3 +183,9 @@ def part2_5():
     sentence = '          \tThis is a sentence with a lot of spaces.   '
     print(sentence)
     print(sentence.strip())
+
+'''
+Part 3: Control flow
+ifs, elses, whiles, and fors
+'''
+
