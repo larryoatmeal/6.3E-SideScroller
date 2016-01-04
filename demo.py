@@ -55,10 +55,10 @@ class RainDrops(Entity):
 		for coord in self.rainDrops:
 			pygame.draw.circle(screen, self.color, toPix(coord[:2]), 1)
 	def onEvent(self, event):
-		if(event.key == EventLib.WALL_COLLISION):
+		if event.key == EventLib.WALL_COLLISION:
 			#push raindrops
 			for coord in self.rainDrops:
-				if(random.randrange(0, 2) == 1):
+				if random.randrange(0, 2) == 1:
 					coord[2] = -10
 				else:
 					coord[2] = 10
@@ -94,18 +94,18 @@ class Player(Entity):
 	# 	return [self.x, self.y, self.x + self.width, self.y + self.height]
 	def onKeyDown(self, keyPressed):
 		print("Player received key down", keyPressed)
-		if(keyPressed == pygame.K_d):
+		if keyPressed == pygame.K_d:
 			self.a_x = Player.FORCE
-		elif(keyPressed == pygame.K_w):
+		elif keyPressed == pygame.K_w:
 			self.a_y = -Player.FORCE
-		elif(keyPressed == pygame.K_a):
+		elif keyPressed == pygame.K_a:
 			self.a_x = -Player.FORCE
-		elif(keyPressed == pygame.K_s):
+		elif keyPressed == pygame.K_s:
 			self.a_y = Player.FORCE
 	def onKeyUp(self, keyPressed):
-		if(keyPressed == pygame.K_d or keyPressed == pygame.K_a):
+		if keyPressed == pygame.K_d or keyPressed == pygame.K_a:
 			self.a_x = 0
-		elif(keyPressed == pygame.K_w or keyPressed == pygame.K_s):
+		elif keyPressed == pygame.K_w or keyPressed == pygame.K_s:
 			self.a_y = 0
 	# def centerPix(self):
 	# 	return [int((self.x + self.width)*UNIT/2.0), int((self.y + self.height)*UNIT/2.0)]

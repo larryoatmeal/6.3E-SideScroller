@@ -19,6 +19,7 @@ class Sprite(Entity):
 		self.w, self.h = dim
 		self.world = world
 		self.image = None
+
 	def getRect(self):#lol
 		return [self.x, self.y, self.w, self.h]
 	def getPixelRect(self, cam):
@@ -29,6 +30,7 @@ class Sprite(Entity):
 			screen.blit(self.image, rect)
 		else:
 			pygame.draw.rect(screen, (125, 125, 125), rect)
+
 	def update(self, dt):
 		pass
 		#can change self.image to change what image is being displayed

@@ -9,6 +9,7 @@ from sprite import *
 # cleaning up entities that are no longer visibile
 class Level:
 	def __init__(self, world):
+		pass
 
 	def pixelToEntity(self, color, pos):
 		#Grass
