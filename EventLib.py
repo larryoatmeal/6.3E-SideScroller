@@ -28,3 +28,9 @@ class PlayerCollisionEvent(Event):
 		#hmm, pass messages or directly
 		self.player = player
 		self.collider = collider
+
+PLAYER_ON_TILE_EVENT = "PLAYER_ON_TILE_EVENT"
+class PlayerOnTileEvent(Event):
+	def __init__(self, tileRect):
+		super().__init__("PLAYER_ON_TILE_EVENT")
+		self.tileRect = tileRect

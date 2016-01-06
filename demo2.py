@@ -11,11 +11,11 @@ WHITE = (255, 255, 255)
 LAVENDAR = (150, 0, 150)
 RED = (255, 0, 0)
 BLUE = (0, 0, 200)
+
 # 3:2 aspect ratio. 30x20 UNITxUNIT blocks
 WIDTH = 480
 HEIGHT = 320
 UNIT = 16
-
 WORLD_WIDTH = int(WIDTH / UNIT) #width of screen in world units
 WORlD_HEIGHT = int(HEIGHT / UNIT)
 MAP_WIDTH = 2 * WORLD_WIDTH #width of entire map in world units
@@ -158,8 +158,7 @@ class SquarePlayer(Player):
         self.color = list(SquarePlayer.COLOR_A)
         self.timeBombs = set()
         self.flinched = False
-    # def getBoundingRectangle(self):
-    #   return [self.x, self.y, self.x + self.width, self.y + self.height]
+    
     def onKeyDown(self, keyPressed):
         print("SquarePlayer received key down", keyPressed)
         if keyPressed == pygame.K_d:
@@ -177,8 +176,6 @@ class SquarePlayer(Player):
         elif keyPressed == pygame.K_w or keyPressed == pygame.K_s:
             self.a_y = 0
 
-    # def centerPix(self):
-    #   return [int((self.x + self.width)*UNIT/2.0), int((self.y + self.height)*UNIT/2.0)]
     def draw(self, screen, camera):
         pygame.draw.rect(screen, self.color, camera.transform(self.getRect()))
 
