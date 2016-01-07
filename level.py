@@ -1,7 +1,7 @@
 from pygame import image, Surface, PixelArray
 
 '''
-The Level class will read a "pixmap", an image where the pixels correspond to
+The Level class will read a 'pixmap', an image where the pixels correspond to
 certain entities at locations in the world for easy level creation.
 
 Level provides the load() method, which will fill a World with Entities as
@@ -24,16 +24,19 @@ class Level:
         color_mapping = {(255, 0, 0): red_func}
     '''
     def __init__(self, level_file, color_mapping):
-    self.color_mapping = color_mapping
+        self.color_mapping = color_mapping
 
-    # Load image from file and store dimensions
-    pixel_map = image.load(level_file)
-    self.width = pixel_map.get_width()
-    self.height = pixel_map.get_height()
+        # Load image from file and store dimensions
+        pixmap = image.load(level_file)
+        self.width, self.height = pixmap.get_size()
 
-    # Convert image surface to pixel array (lighter)
-    self.pixel_array = map(PixelArray(pixel_map),
-                        lambda x: map(Surface.unmap_rgb, x))
+        # Convert pixels to colors
+        def index_to_color(i):
+            color = pixmap.unmap_rgb(i)
+            return (color.r, color.g, color.b)
+        self.pixel_array = list(map(
+                               lambda index: list(map(
+                                   index_to_color, index)), PixelArray(pixmap)))
 
     '''
     Iterates over the pixel array and calls the function defined in
@@ -43,10 +46,18 @@ class Level:
     def load(self, world):
         for i in range(self.width):
             for j in range(self.height):
-                color = self.pixel_array[i, j]
+                color = self.pixel_array[i][j]
                 try:
                     function = self.color_mapping[color]
                     function(world, (i, j))
                 except KeyError:
-                    print(str(color) +
-                          'does not map to a function in color_mapping')
+                    print('KeyError in Level.load(): Color', str(color),
+                          'does not map to a function in color_mapping.')
+
+if __name__ == '__main__':
+    print('Testing Level.py class')
+    level = Level('level_test.png', {
+        (255, 255, 255): lambda world, pos: print('white', pos),
+        (0, 0, 0): lambda world, pos: print('black', pos)
+    })
+    level.load(None)
