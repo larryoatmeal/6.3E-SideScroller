@@ -41,7 +41,10 @@ def doIntervalOverlap(interval1, interval2, epsilon):
 
 class AssetManager:
     def __init__(self):
-        self.panda = pygame.image.load("assets/images/panda.png").convert_alpha()
+        self.pandaRight = pygame.image.load("assets/images/panda.png").convert_alpha()
+        self.pandaRight2 = pygame.image.load("assets/images/panda2.png").convert_alpha()
+        self.pandaLeft = pygame.transform.flip(self.pandaRight, True, False)
+        self.pandaLeft2 = pygame.transform.flip(self.pandaRight2, True, False)
         self.squash = pygame.image.load("assets/images/delicata_squash.png").convert_alpha()
         # print(self.panda)
 
@@ -65,6 +68,23 @@ class TimeBomb:
 
 
 
+
+class Animation:
+    def __init__(self, animations, intervalTimeMs):
+        self.animations = animations
+        self.animationIndex = 0
+        self.intervalTimeMs = intervalTimeMs
+        self.elapsedTime = 0
+
+    def update(self, dt):
+        self.elapsedTime += dt
+        if self.elapsedTime > self.intervalTimeMs:
+            self.animationIndex = (self.animationIndex + 1) % len(self.animations)
+            self.elapsedTime %= self.intervalTimeMs
+
+    def getCurrentImage(self):
+        return self.animations[self.animationIndex]
+
 class Panda(Player):
     def __init__(self, world, pos, dim, assets):
         super().__init__(world, pos, dim)
@@ -82,6 +102,7 @@ class Panda(Player):
         self.WALKING_RIGHT = "WALKING_RIGHT"
         self.WALKING_LEFT = "WALKING_LEFT"
         self.STANDING = "STANDING"
+        self.isFacingLeft = False
         self.state = self.STANDING
         self.justHitTile = False
 
@@ -89,6 +110,13 @@ class Panda(Player):
 
         self.consumeOnce = []
         self.onPlatForm = False
+
+        rightAnimationTextures = [assets.pandaRight, assets.pandaRight2]
+        leftAnimationTextures = [assets.pandaLeft, assets.pandaLeft2]
+
+        self.rightAnimation = Animation(rightAnimationTextures, 100)
+        self.leftAnimation = Animation(leftAnimationTextures, 100)
+
 
     def jump(self, dt):
         self.v_y = -10
@@ -98,6 +126,10 @@ class Panda(Player):
         if keyPressed == pygame.K_w:
             print("W pressed")
             self.consumeOnce.append(self.jump)
+        if keyPressed == pygame.K_a:
+            self.isFacingLeft = True
+        if keyPressed == pygame.K_d:
+            self.isFacingLeft = False
 
     def onKeyUp(self, keyPressed):
         self.currentlyPressedKeys.remove(keyPressed)
@@ -111,10 +143,19 @@ class Panda(Player):
             self.state = self.STANDING
 
     def draw(self, screen, camera):
-        screen.blit(assets.panda, camera.transform(self.getRect()))
+        if self.isFacingLeft:
+            screen.blit(self.leftAnimation.getCurrentImage(), camera.transform(self.getRect()))
+        else:
+            screen.blit(self.rightAnimation.getCurrentImage(), camera.transform(self.getRect()))
 
     def update(self, dt):
         self.mapKeysToState()
+
+        #update animations
+        self.rightAnimation.update(dt)
+        self.leftAnimation.update(dt)
+
+
         print(self.state)
         print(self.x, self.y)
         print(self.v_x, self.v_y)
