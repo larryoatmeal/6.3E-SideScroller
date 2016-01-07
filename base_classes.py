@@ -1,3 +1,5 @@
+import pygame
+
 class Entity:
 	def __init__(self, world):
 		self.world = world

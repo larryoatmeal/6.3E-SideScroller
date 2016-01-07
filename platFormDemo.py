@@ -45,7 +45,10 @@ class AssetManager:
         self.pandaRight2 = pygame.image.load("assets/images/panda2.png").convert_alpha()
         self.pandaLeft = pygame.transform.flip(self.pandaRight, True, False)
         self.pandaLeft2 = pygame.transform.flip(self.pandaRight2, True, False)
-        self.squash = pygame.image.load("assets/images/delicata_squash.png").convert_alpha()
+        self.squashRight = pygame.image.load("assets/images/butternut_squash.png").convert_alpha()
+        self.squashRight2 = pygame.image.load("assets/images/butternut_squash2.png").convert_alpha()
+        self.squashLeft = pygame.transform.flip(self.squashRight, True, False)
+        self.squashLeft2 = pygame.transform.flip(self.squashRight2, True, False)
         # print(self.panda)
 
 class TimeBomb:
@@ -252,6 +255,22 @@ class Panda(Player):
         #         if self.x + self.w > t_x:
         #             self.x = t_x - self.w
 
+class Squash(Player):
+    def __init__(self, world, pos, dim, assets):
+        super().__init__(world, pos, dim)
+        self.rightAnimationTextures = [assets.squashRight, assets.squashRight2]
+        self.leftAnimationTextures = [assets.squashLeft, assets.squashLeft2]
+
+        self.leftAnimation = Animation(self.leftAnimationTextures, 100)
+        self.rightAnimation = Animation(self.rightAnimationTextures, 100)
+
+    def update(self, dt):
+        self.leftAnimation.update(dt)
+        self.rightAnimation.update(dt)
+
+    def draw(self, screen, cam):
+        super().draw(screen, cam)
+        screen.blit(self.rightAnimation.getCurrentImage(), cam.transform(self.getRect()))
 
 class SquareTile(Sprite):
     def __init__(self, world, pos, dim):
@@ -324,7 +343,10 @@ assets = AssetManager()
 world = MyWorld()
 # player = SquarePlayer(world, (5, 5), (1, 1))
 panda = Panda(world, (0,0), (1,1), assets)
+squash = Squash(world, (2,5), (1,1), assets)
+
 world.addPlayer(panda)
+world.addEntity(squash)
 
 cam = Camera(WIDTH, HEIGHT, WORLD_WIDTH)
 world.setCamera(cam)
