@@ -44,5 +44,9 @@ class Level:
         for i in range(self.width):
             for j in range(self.height):
                 color = self.pixel_array[i, j]
-                function = self.color_mapping[color]
-                function((i, j), world)
+                try:
+                    function = self.color_mapping[color]
+                    function((i, j), world)
+                except KeyError:
+                    print(str(color) +
+                          'does not map to a function in color_mapping')
