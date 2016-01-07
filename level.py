@@ -1,23 +1,52 @@
-from base_classes import *
-from pygame import Rect
-from sprite import *
+from pygame import image, Surface, PixelArray
 
-# Eventually this class will read a "pixmap", an image where the pixels 
-# correspond to certain entities at locations in the world for easy level creation
+'''
+The Level class will read a "pixmap", an image where the pixels correspond to
+certain entities at locations in the world for easy level creation.
 
-# Level will manage initializing entities when they become visible, as well as 
-# cleaning up entities that are no longer visibile
+Level provides the load() method, which will fill a World with Entities as
+defined by the color_mapping dictionary.
+'''
 class Level:
-	def __init__(self, world):
-		pass
+    '''
+    level_file is the location of the image file that describes the level by
+    pixel.
 
-	def pixelToEntity(self, color, pos):
-		#Grass
-		world = self.world
-		cam = self.cam
+    color_mapping is a dictionary that maps colors in (r, g, b) format to
+    functions accepting a World object and a (x, y) position. This would
+    typically be used to construct Sprites by color.
 
-		if color == Color(17, 200, 17):
-			return Grass(world, pos, (1,1))
+    For example, this mapping would construct Players of size (50, 75) at the
+    position specified by red pixel locations:
+        def red_func(world, pos):
+            player = Player(world, pos, (50, 75))
+            world.addPlayer(player)
+        color_mapping = {(255, 0, 0): red_func}
+    '''
+    def __init__(self, level_file, color_mapping):
+    self.color_mapping = color_mapping
 
+    # Load image from file and store dimensions
+    pixel_map = image.load(level_file)
+    self.width = pixel_map.get_width()
+    self.height = pixel_map.get_height()
 
+    # Convert image surface to pixel array (lighter)
+    self.pixel_array = map(PixelArray(pixel_map),
+                        lambda x: map(Surface.unmap_rgb, x))
 
+    '''
+    Iterates over the pixel array and calls the function defined in
+    color_mapping corresponding to the color at that location, passing that
+    function the pixel position and the world.
+    '''
+    def load(self, world):
+        for i in range(self.width):
+            for j in range(self.height):
+                color = self.pixel_array[i, j]
+                try:
+                    function = self.color_mapping[color]
+                    function(world, (i, j))
+                except KeyError:
+                    print(str(color) +
+                          'does not map to a function in color_mapping')
