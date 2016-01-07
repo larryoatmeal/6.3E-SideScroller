@@ -34,7 +34,7 @@ class Level:
         def index_to_color(i):
             color = pixmap.unmap_rgb(i)
             return (color.r, color.g, color.b)
-        self.pixel_array = list(map(
+        self.color_array = list(map(
                                lambda index: list(map(
                                    index_to_color, index)), PixelArray(pixmap)))
 
@@ -46,7 +46,7 @@ class Level:
     def load(self, world):
         for i in range(self.width):
             for j in range(self.height):
-                color = self.pixel_array[i][j]
+                color = self.color_array[i][j]
                 try:
                     function = self.color_mapping[color]
                     function(world, (i, j))
