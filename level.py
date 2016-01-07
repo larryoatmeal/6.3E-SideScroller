@@ -13,12 +13,12 @@ class Level:
     pixel.
 
     color_mapping is a dictionary that maps colors in (r, g, b) format to
-    functions accepting a (x, y) position and a World object. This would
+    functions accepting a World object and a (x, y) position. This would
     typically be used to construct Sprites by color.
 
     For example, this mapping would construct Players of size (50, 75) at the
     position specified by red pixel locations:
-        def red_func(pos, world):
+        def red_func(world, pos):
             player = Player(world, pos, (50, 75))
             world.addPlayer(player)
         color_mapping = {(255, 0, 0): red_func}
@@ -46,7 +46,7 @@ class Level:
                 color = self.pixel_array[i, j]
                 try:
                     function = self.color_mapping[color]
-                    function((i, j), world)
+                    function(world, (i, j))
                 except KeyError:
                     print(str(color) +
                           'does not map to a function in color_mapping')
