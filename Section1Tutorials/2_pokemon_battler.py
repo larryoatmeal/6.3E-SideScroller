@@ -1,7 +1,7 @@
 import random
 import time
 
-# Move types
+# Move pokeTypes
 # Constants typically all caps
 FIRE = "FIRE"
 WATER = "WATER"
@@ -9,14 +9,14 @@ GRASS = "GRASS"
 
 
 class Pokemon:
-    def __init__(self, name, initHp, type):
+    def __init__(self, name, initHp, pokeType):
         self.name = name
         self.hp = initHp
         self.strength = 20
-        self.type = type
+        self.pokeType = pokeType
 
     def attack(self, otherPokemon):
-        # deal damage based on types
+        # deal damage based on pokeTypes
         # note we need to use self to call fields/methods within own class
 
         bonusMultipler = self.getBonusMultiplier(otherPokemon)
@@ -31,17 +31,17 @@ class Pokemon:
         SUPER_EFFECTIVE = 2
         NOT_VERY_EFFECTIVE = 0.5
 
-        if self.type == FIRE and self.type == WATER:
+        if self.pokeType == FIRE and self.pokeType == WATER:
             return NOT_VERY_EFFECTIVE
-        elif self.type == WATER and self.type == FIRE:
+        elif self.pokeType == WATER and self.pokeType == FIRE:
             return SUPER_EFFECTIVE
-        elif self.type == GRASS and self.type == FIRE:
+        elif self.pokeType == GRASS and self.pokeType == FIRE:
             return NOT_VERY_EFFECTIVE
-        elif self.type == FIRE and self.type == GRASS:
+        elif self.pokeType == FIRE and self.pokeType == GRASS:
             return SUPER_EFFECTIVE
-        elif self.type == WATER and self.type == GRASS:
+        elif self.pokeType == WATER and self.pokeType == GRASS:
             return NOT_VERY_EFFECTIVE
-        elif self.type == GRASS and self.type == WATER:
+        elif self.pokeType == GRASS and self.pokeType == WATER:
             return SUPER_EFFECTIVE
         else:
             return 1
@@ -64,9 +64,11 @@ rounds = [(charmander, squirtle), (bulbasaur, squirtle), (bulbasaur, charmander)
 for round in rounds:
     contestant1 = round[0]  # you access elements in a tuple the same as in a list
     contestant2 = round[1]
-    print("--------------------------------------------------")
+    print("**************************************************")
+    print("**************************************************")
     print(contestant1.name + " VS " + contestant2.name)
-    print("--------------------------------------------------")
+    print("**************************************************")
+    print("**************************************************")
 
     while (True):
         contestant1.attack(contestant2)
