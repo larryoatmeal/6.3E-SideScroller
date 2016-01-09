@@ -22,8 +22,14 @@ def print_scene(scene):
     print()
 
 def get_choice(scene):
-    # Implement me!
-    pass
+    choice = input('Enter your choice (1 or 2): ')
+    while True:
+        if choice.strip() == '1':
+            return scene[2]
+        elif choice.strip() == '2':
+            return scene[4]
+        else:
+            choice = input('Please enter either 1 or 2: ')
 
 def print_win(scene):
     print(scene[0])
@@ -38,11 +44,35 @@ def print_win(scene):
             choice = input('Please enter either y or n: ')
 
 def print_lose(scene):
-    # Implement me!
-    pass
+    print(scene[0])
+    print()
+    choice = input('Oh no, Larry-senpai didn\'t notice you! Try again (y/n)? ')
+    while True:
+        if choice.strip() == 'y' or choice.strip() == 'Y':
+            return True
+        elif choice.strip() == 'n' or choice.strip() == 'N':
+            return False
+        else:
+            choice = input('Please enter either y or n: ')
 
 def begin_adventure():
-    # Implement me!
-    pass
+    opening_scene()
+    index = 0
+    while True:
+        scene = scenes[index]
+        if scene[1] == 'win': # win condition
+            restart = print_win(scene)
+            if restart:
+                begin_adventure()
+            break
+        elif scene[1] == 'lose': # lose condition
+            restart = print_lose(scene)
+            if restart:
+                begin_adventure()
+            break
+        else:
+            print_scene(scene)
+            index = get_choice(scene)
+            print()
 
 begin_adventure()
