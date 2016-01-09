@@ -31,17 +31,17 @@ class Pokemon:
         SUPER_EFFECTIVE = 2
         NOT_VERY_EFFECTIVE = 0.5
 
-        if self.pokeType == FIRE and self.pokeType == WATER:
+        if self.pokeType == FIRE and otherPokemon.pokeType == WATER:
             return NOT_VERY_EFFECTIVE
-        elif self.pokeType == WATER and self.pokeType == FIRE:
+        elif self.pokeType == WATER and otherPokemon.pokeType == FIRE:
             return SUPER_EFFECTIVE
-        elif self.pokeType == GRASS and self.pokeType == FIRE:
+        elif self.pokeType == GRASS and otherPokemon.pokeType == FIRE:
             return NOT_VERY_EFFECTIVE
-        elif self.pokeType == FIRE and self.pokeType == GRASS:
+        elif self.pokeType == FIRE and otherPokemon.pokeType == GRASS:
             return SUPER_EFFECTIVE
-        elif self.pokeType == WATER and self.pokeType == GRASS:
+        elif self.pokeType == WATER and otherPokemon.pokeType == GRASS:
             return NOT_VERY_EFFECTIVE
-        elif self.pokeType == GRASS and self.pokeType == WATER:
+        elif self.pokeType == GRASS and otherPokemon.pokeType == WATER:
             return SUPER_EFFECTIVE
         else:
             return 1
