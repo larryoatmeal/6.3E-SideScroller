@@ -16,14 +16,13 @@ class Pokemon:
         self.type = type
 
     def attack(self, otherPokemon):
-        # deal damage based on super effective
-
-        # note we need to use self to call methods within own class
+        # deal damage based on types
+        # note we need to use self to call fields/methods within own class
 
         bonusMultipler = self.getBonusMultiplier(otherPokemon)
         randomnessFactor = random.uniform(0.7, 1.3)  # generate random number between 0.7 and 1.3
-        otherPokemon.hp -= self.strength - bonusMultipler - randomnessFactor
-        otherPokemon.hp = max(0, otherPokemon.hp)  # prevent hp from going negative
+        otherPokemon.hp -= self.strength * bonusMultipler * randomnessFactor
+        otherPokemon.hp = max(0, otherPokemon.hp)  # prevent hp from going negative. max is a built in function
 
     def isFainted(self):
         return self.hp <= 0
@@ -32,7 +31,6 @@ class Pokemon:
         SUPER_EFFECTIVE = 2
         NOT_VERY_EFFECTIVE = 0.5
 
-        bonusMultipler = 1
         if self.type == FIRE and self.type == WATER:
             return NOT_VERY_EFFECTIVE
         elif self.type == WATER and self.type == FIRE:
@@ -46,7 +44,6 @@ class Pokemon:
         elif self.type == GRASS and self.type == WATER:
             return SUPER_EFFECTIVE
         else:
-            # note this is redundant, but sometimes better to clarify
             return 1
 
 
