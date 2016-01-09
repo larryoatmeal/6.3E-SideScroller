@@ -12,7 +12,7 @@ If you already have Python2 installed, I recommend renaming the python executabl
 
 ##Mac 
 Installation is a pain. Here are some tips if you're running into trouble
-* If Bower complains and tells you to run something like "sudo chown ....", do what it says
+* If Brew complains and tells you to run something like "sudo chown ....", do what it says
 * If you're not seeing a cute panda following a square when running the demo, but some really ugly looking thing, you will have to downgrade SDL_image from 1.2.12 to 1.2.10. This is a bit involved, so let me know if you run into this problem
 
 
@@ -27,6 +27,9 @@ brew install python3 hg sdl sdl_image sdl_mixer sdl_ttf portmidi
 
 (2) Install PyGame:
 pip3 install hg+http://bitbucket.org/pygame/pygame
+
+##PortAudio
+To test out the port audio, https://people.csail.mit.edu/hubert/pyaudio/
 
 
 Run
