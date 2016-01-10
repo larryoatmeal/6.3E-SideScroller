@@ -1,4 +1,8 @@
 class Expr(object):
+    '''
+    Every possible expression is an instance of Expr.  Subclasses include
+    variables (VarExponent), operations (Add), and constants (N).
+    '''
     def __init__(self):
         self.const_factor = 1
 
@@ -10,15 +14,27 @@ class Expr(object):
         return str(self)
 
     def get_const_factor(self):
+        '''
+        Every expression is responsible for tracking the constant factor that
+        it is multiplied by.
+        '''
         return self.const_factor
 
 class Add(Expr):
+    '''
+    Represents the sum of several other Expr's.
+    For example: Add([N(5), Add(Var('x'), Var('y))])
+    Currently supports the following simplification operations:
+    - Grouping variables by hashstr: x + 2x -> 3x
+    - Flattening nested Add's: Add(x, Add([y, z])) -> Add([x, y, z])
+    '''
 
     def __init__(self, terms):
         self.terms = terms
         self.simplify()
 
     def simplify(self):
+        # Flatten recursive adds.
         flattened_terms = []
         for term in self.terms:
             if isinstance(term, Add):
@@ -26,6 +42,7 @@ class Add(Expr):
             else:
                 flattened_terms.append(term)
 
+        # Group all the terms by their hashstr.
         const_factors = {}
         variables = {}
         for term in self.terms:
@@ -35,6 +52,7 @@ class Add(Expr):
                 const_factors[term.hashstr()] = term.get_const_factor()
                 variables[term.hashstr()] = term
 
+        # Rebuild the terms.
         new_terms = []
         for hashstr, const in const_factors.items():
             new_terms.append(variables[hashstr])
@@ -43,25 +61,20 @@ class Add(Expr):
         self.terms = new_terms
 
     def __str__(self):
-        string = ''
+        # Combine the terms with a + symbol.  This is good for hashstr as well.
+        term_strings = []
         for term in self.terms:
-            string += str(term) + ' + '
-        return string[:-3]
-
-# 5 + 3x + 2y
-# Add(5, Add(3x, 2y))  binary
-# Add(5, 3x, 2y)       flat
-
-# 4 + 3x + 2y + z + 2x
-# Add(4, Add(3x, Add(2y, Add(z, 2x))))
+            term_strings.append(str(term))
+        term_strings.sort()
+        return '+'.join(term_strings)
 
 class Multiply(Expr):
     '''
-    [Multiply(5, x), Multiply(2, y), x]
-    [5, x, 2, y, x]
-        -> [10, x^2, y]
+    Represents the product of some Expr's.
+    Simplification supports the following operations:
+    - Flattening nested Multiply's.
+    - Combining variables together into powers: x * x^2 -> x^3
     '''
-
 
     def __init__(self, terms):
         self.terms = terms
@@ -101,10 +114,7 @@ class Multiply(Expr):
             self.terms.append(new_term)
 
     def __str__(self):
-        string = str(self.const_factor)
-        for term in self.terms:
-            string += str(term)
-        return string
+        return str(self.const_factor) + self.hashstr()
 
     def hashstr(self):
         # Hashing for adding.
@@ -115,6 +125,9 @@ class Multiply(Expr):
         return ''.join(term_strings)
 
 class VarExponent(Expr):
+    '''
+    Represents a single variable to some power: x^3.
+    '''
     def __init__(self, name, power):
         super(VarExponent, self).__init__()
         self.name = name
@@ -134,6 +147,9 @@ class Var(VarExponent):
         return self.name
 
 class N(Expr):
+    '''
+    Represents a number, like 42.
+    '''
     def __init__(self, val):
         self.const_factor = val
 
