@@ -58,7 +58,13 @@ class Add(Expr):
             new_terms.append(variables[hashstr])
             new_terms[-1].const_factor = const
 
-        self.terms = new_terms
+        # Check for zeroes
+        newer_terms = []
+        for i in new_terms:
+            if i.const_factor != 0:
+                newer_terms.append(i)
+
+        self.terms = newer_terms
 
     def __str__(self):
         # Combine the terms with a + symbol.  This is good for hashstr as well.
@@ -171,3 +177,7 @@ term1 = Add([N(2), Var('x')])
 term2 = Add([N(3), Var('x')])
 total = Multiply([term1, term2])
 print(total)
+
+#Test the 0 eliminator
+ans = Add([Var('x'), Multiply([N(-1), Var('x')]), N(5)])
+print('This should print 5 if the 0 eliminator in the add function works: ' + str(ans))
