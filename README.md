@@ -15,7 +15,6 @@ Installation is a pain. Here are some tips if you're running into trouble
 * If Brew complains and tells you to run something like "sudo chown ....", do what it says
 * If you're not seeing a cute panda following a square when running the demo, but some really ugly looking thing, you will have to downgrade SDL_image from 1.2.12 to 1.2.10. This is a bit involved, so let me know if you run into this problem
 
-
 ##Download PyGame with brew + pip (Mac)
 Follow the instructions here:
 http://pygame.org/wiki/macintosh

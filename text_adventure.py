@@ -1,3 +1,6 @@
+blah = 'hi'
+
+
 scenes = [
     ['You begin on your quest to get Larry-senpai to notice you! You are currently DJing a party where Larry-senpai is present. What music selection will you choose?', 'Rock n roll', 1, 'Smooth, smooth jazz', 2], #0
     ['You put on some old school rock n roll. Unfortunately, it seems like rock n roll is not what Larry-senpai wants to hear. He dances half-heartedly for a little while and leaves the party.', 'lose'], #1
