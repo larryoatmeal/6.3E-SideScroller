@@ -178,6 +178,6 @@ term2 = Add([N(3), Var('x')])
 total = Multiply([term1, term2])
 print(total)
 
-#Test the 0 eliminator
+# Test the 0 eliminator
 ans = Add([Var('x'), Multiply([N(-1), Var('x')]), N(5)])
 print('This should print 5 if the 0 eliminator in the add function works: ' + str(ans))
