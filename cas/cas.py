@@ -72,7 +72,18 @@ class Add(Expr):
         for term in self.terms:
             term_strings.append(str(term))
         term_strings.sort()
-        return '+'.join(term_strings)
+        final_string = ''
+        count = 0
+        for term in term_strings:
+            if count == 0:
+                count += 1
+                final_string += term
+                continue
+            if term[0] == "-":
+                final_string += "-" + term[1:]
+            else:
+                final_string += "+" + term
+        return final_string
 
 class Multiply(Expr):
     '''
@@ -178,6 +189,9 @@ term2 = Add([N(3), Var('x')])
 total = Multiply([term1, term2])
 print(total)
 
-#Test the 0 eliminator
+# Test the 0 eliminator
 ans = Add([Var('x'), Multiply([N(-1), Var('x')]), N(5)])
 print('This should print 5 if the 0 eliminator in the add function works: ' + str(ans))
+
+# Test that negatives format correctly in adds
+print(Add([N(6), Multiply([Var('x'), N(1)])]))
