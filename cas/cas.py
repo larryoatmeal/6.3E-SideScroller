@@ -171,3 +171,5 @@ term1 = Add([N(2), Var('x')])
 term2 = Add([N(3), Var('x')])
 total = Multiply([term1, term2])
 print(total)
+
+print(Add([N(-6), Multiply([Var('x'), N(-1)])]))
