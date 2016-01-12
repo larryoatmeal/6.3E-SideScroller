@@ -20,6 +20,7 @@ class Expr(object):
         '''
         return self.const_factor
 
+
 class Add(Expr):
     '''
     Represents the sum of several other Expr's.
@@ -48,7 +49,7 @@ class Add(Expr):
         for term in self.terms:
             if term.hashstr() in const_factors:
                 const_factors[term.hashstr()] += term.get_const_factor()
-            else: 
+            else:
                 const_factors[term.hashstr()] = term.get_const_factor()
                 variables[term.hashstr()] = term
 
@@ -159,15 +160,28 @@ class N(Expr):
     def hashstr(self):
         return '1'
 
+def Exponent( expression, power):
+
+    terms = [ N(expression.const_factor ** power) ]
+    for term in expression.terms:
+        multipliedTerm = []
+        for i in range( power ):
+            multipliedTerm.append( term )
+        terms.append( Multiply( multipliedTerm ))
+    return Multiply(terms)
+
+
 
 term1 = Multiply([N(2), Var('x'), Var('y')])
 term2 = Multiply([N(3), Var('x'), Var('x')])
 term3 = Multiply([N(4), Var('y'), Var('x')])
 total = Add([term1, term2, term3])
-print(total)
+#print(total)
 
 # THIS DOESN'T CURRENTLY WORK
 term1 = Add([N(2), Var('x')])
 term2 = Add([N(3), Var('x')])
 total = Multiply([term1, term2])
-print(total)
+#print(total)
+
+print( Exponent( Multiply( [N(2), Exponent( Multiply( [N(2), Var('x') ]), 2 ), Var('y')]) , 3) )
