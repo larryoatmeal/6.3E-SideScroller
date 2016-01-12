@@ -176,12 +176,12 @@ term1 = Multiply([N(2), Var('x'), Var('y')])
 term2 = Multiply([N(3), Var('x'), Var('x')])
 term3 = Multiply([N(4), Var('y'), Var('x')])
 total = Add([term1, term2, term3])
-#print(total)
+print(total)
 
 # THIS DOESN'T CURRENTLY WORK
 term1 = Add([N(2), Var('x')])
 term2 = Add([N(3), Var('x')])
 total = Multiply([term1, term2])
-#print(total)
+print(total)
 
 print( Exponent( Multiply( [N(2), Exponent( Multiply( [N(2), Var('x') ]), 2 ), Var('y')]) , 3) )
