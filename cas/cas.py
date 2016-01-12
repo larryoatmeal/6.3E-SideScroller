@@ -63,8 +63,6 @@ class Add(Expr):
         for i in new_terms:
             if i.const_factor != 0:
                 newer_terms.append(i)
-                
-                
 
         self.terms = newer_terms
 
