@@ -20,6 +20,8 @@ class Expr(object):
         '''
         return self.const_factor
 
+    def __eq__(self, other):
+        return type(self) == type(other) and str(self) == str(other)
 
 class Add(Expr):
     '''
