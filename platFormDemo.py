@@ -286,6 +286,8 @@ class MyWorld(World):
         super().__init__()
         self._collidesWithPlayer = set()
         self._platforms = set()
+
+
         self.MAP_WIDTH = 60
         self.MAP_HEIGHT = 60
         self.level = level
@@ -298,6 +300,9 @@ class MyWorld(World):
 
     def addCollidesWithPlayer(self, sprite):
         self._collidesWithPlayer.add(sprite)
+
+
+
 
     def removeFromAll(self, obj):
         super().removeFromAll(obj)
@@ -344,7 +349,6 @@ pygame.display.set_caption("NEXT 3E")
 
 assets = AssetManager()
 
-
 def grass_func(world, pos):
     # player = Player(world, pos, (50, 75))
     # world.addPlayer(player)
@@ -375,32 +379,7 @@ level_mapping = {
 level = Level("assets/levels/demo_level.png", level_mapping)
 world = MyWorld(level)
 
-# player = SquarePlayer(world, (5, 5), (1, 1))
-# squash = Squash(world, (2,5), (1,1), assets)
-# world.addEntity(squash)
-
 cam = Camera(WIDTH, HEIGHT, WORLD_WIDTH)
 world.setCamera(cam)
-world.MAP_WIDTH = level.width
-world.MAP_HEIGHT = level.height
-
-# print(level.width)
-#
-# floor = list(zip(range(0, 50), [15]*50))
-#
-# stairs = []
-# for x in range(20,25):
-#     for y in range(0, x-20):
-#         stairs.append((x,15-y))
-#
-# # print(stairs)
-#
-# floater = list(zip(range(10,20), [5]*10))
-# tiles = floor + stairs + floater
-
-# for (x,y) in tiles:
-#     squash = SquareTile(world, (x, y), (1, 1))
-#     world.addEntity(squash)
-#     world._platforms.add(squash)
 
 GameLoop.runGame(world, WIDTH, HEIGHT)

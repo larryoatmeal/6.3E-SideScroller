@@ -70,7 +70,7 @@ class Event:
 
 class World(Entity):
     def __init__(self):
-        self._entities = set()
+        self._entities = {}
         self._listeners = set()
         self._eventQueue = []
         self._players = [] #probably only need to deal with one, but just in case
@@ -107,7 +107,7 @@ class World(Entity):
     def update(self, dt):
         self.notifyListeners()
         self.world_update(dt)
-        for entity in self._entities:
+        for entity in self._entities:#the entity is the key
             entity.update(dt)
         for player in self._players:
             player.update(dt)
@@ -117,10 +117,29 @@ class World(Entity):
     #draw children
     def draw(self, screen):
         self.world_draw(screen)
-        for entity in self._entities:
-            entity.draw(screen, self.camera)
+        #Draw by z value
+        z0 = set()
+        z1 = set()
+        z2 = set()
+
+        for entity, z in self._entities.items():
+            if z == 0:
+                z0.add(entity)
+            if z == 1:
+                z1.add(entity)
+            if z == 2:
+                z2.add(entity)
+            else:#default add to back
+                z0.add(entity)
+
         for player in self._players:
-            player.draw(screen, self.camera)
+            z1.add(player) #add player to layer 1 default
+        layers = [z0, z1, z2]
+
+        for layer in layers:
+            for entity in layer:
+                entity.draw(screen, self.camera)
+
     def notifyListeners(self):
         for event in self._eventQueue:
             if not self.world_onEvent(event):#if not consumed by world, give to children
@@ -130,12 +149,13 @@ class World(Entity):
                         break
         self._eventQueue = []
     #register an Entity as part of this world
-    def addEntity(self, entity):
-        self._entities.add(entity)
+    def addEntity(self, entity, z = 1): #0 back, 1 middle, 2 back
+        self._entities[entity] = z #doesn't really matter what the value is
     #remove entity from this world
     def removeEntity(self, entity):
         if entity in self._entities:
-            self._entities.remove(entity)
+            # self._entities.remove(entity)
+            self._entities.pop(entity, None)
 
     #listener must implement onEvent(event)
     def addListener(self, listener):
