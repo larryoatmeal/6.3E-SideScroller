@@ -49,6 +49,7 @@ class AssetManager:
         self.squashRight2 = pygame.image.load("assets/images/butternut_squash2.png").convert_alpha()
         self.squashLeft = pygame.transform.flip(self.squashRight, True, False)
         self.squashLeft2 = pygame.transform.flip(self.squashRight2, True, False)
+        self.spikes = pygame.image.load("assets/images/spike.png").convert_alpha()
         # print(self.panda)
 
 class TimeBomb:
@@ -264,7 +265,7 @@ class Squash(Player):
         self.rightAnimation.update(dt)
 
     def draw(self, screen, cam):
-        super().draw(screen, cam)
+        # super().draw(screen, cam) don't call super unless you want demo
         screen.blit(self.rightAnimation.getCurrentImage(), cam.transform(self.getRect()))
 
 class SquareTile(Sprite):
@@ -281,13 +282,17 @@ class SquareTile(Sprite):
         #direct message player
         player.onEvent(EventLib.PlayerOnTileEvent(self.getRect()))
 
+class Spike(Sprite):
+    def __init__(self, world, pos, dim, assets):
+        super().__init__(world, pos, dim)
+        self.image = assets.spikes
+
 class MyWorld(World):
     def __init__(self, level):
         super().__init__()
         self._collidesWithPlayer = set()
         self._platforms = set()
-
-
+        self._projectiles = set()
         self.MAP_WIDTH = 60
         self.MAP_HEIGHT = 60
         self.level = level
@@ -300,9 +305,6 @@ class MyWorld(World):
 
     def addCollidesWithPlayer(self, sprite):
         self._collidesWithPlayer.add(sprite)
-
-
-
 
     def removeFromAll(self, obj):
         super().removeFromAll(obj)
@@ -333,6 +335,11 @@ class MyWorld(World):
     def getIntersectingTiles(self, rect):
         return filter(lambda platform: doRectsOverlap(platform.getRect(), rect), self._platforms)
 
+    def kill(self, entity):
+        super().kill(entity)
+        self._collidesWithPlayer.pop(entity, None)
+        self._platforms.pop(entity, None)
+        self._projectiles.pop(entity, None)
 
 #------------------------Wire up world------------------------------#
 # 3:2 aspect ratio. 30x20 UNITxUNIT blocks
@@ -357,9 +364,15 @@ def grass_func(world, pos):
     world.addEntity(grass)
     world._platforms.add(grass)
 def enemy_func(world, pos):
+    print("Adding enemy", pos)
+    enemy = Squash(world, pos, (1,1), assets)
+    world.addEntity(enemy)
     pass
 
 def spike_func(world, pos):
+    print("Adding spike", pos)
+    spike = Spike(world, pos, (1, 1), assets)
+    world.addEntity(spike)
     pass
 
 def empty_func(world, pos):
@@ -370,8 +383,8 @@ def player_func(world, pos):
     world.addPlayer(panda)
 level_mapping = {
     (0, 255, 0): grass_func,
-    (255, 0, 0): enemy_func,
-    (0, 0, 255): spike_func,
+    (0, 0, 255): enemy_func,
+    (255, 0, 0): spike_func,
     (0, 0, 0): empty_func,
     (255, 255, 255): player_func
 }

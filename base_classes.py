@@ -35,7 +35,10 @@ class Sprite(Entity):
 
     def update(self, dt):
         pass
-        #can change self.image to change what image is being displayed
+
+    def kill(self):#removes self from world
+        self.world.kill(self)
+    #can change self.image to change what image is being displayed
 
 class Player(Sprite):
     # def getBoundingRectangle(self):
@@ -70,11 +73,13 @@ class Event:
 
 class World(Entity):
     def __init__(self):
+        self.DEBUG = True
         self._entities = {}
         self._listeners = set()
         self._eventQueue = []
         self._players = [] #probably only need to deal with one, but just in case
         #YOUR OWN WORLD PARAMS HERE
+
 
         #commonly accessed parameters here
         self.player_position = None #assuming here that there is just one player
@@ -185,3 +190,7 @@ class World(Entity):
             player.onKeyDown(keyCode)
     def setCamera(self, cam):
         self.camera = cam
+
+    def kill(self, entity):
+        self._listeners.pop(entity, None)
+        self._entities.pop(entity, None)
