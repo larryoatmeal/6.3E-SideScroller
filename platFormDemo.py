@@ -3,7 +3,7 @@ from base_classes import *
 from camera import Camera
 import GameLoop
 import EventLib
-
+from level import Level
 
 #-------------------------------Convenience methods------------------------------
 def sign(x):
@@ -67,11 +67,6 @@ class TimeBomb:
 
 
 #-------------------------------Entities methods------------------------------
-
-
-
-
-
 class Animation:
     def __init__(self, animations, intervalTimeMs):
         self.animations = animations
@@ -159,9 +154,9 @@ class Panda(Player):
         self.leftAnimation.update(dt)
 
 
-        print(self.state)
-        print(self.x, self.y)
-        print(self.v_x, self.v_y)
+        # print(self.state)
+        # print(self.x, self.y)
+        # print(self.v_x, self.v_y)
         if self.state == self.WALKING_LEFT:
             self.a_x = -50
         elif self.state == self.WALKING_RIGHT:
@@ -287,12 +282,19 @@ class SquareTile(Sprite):
         player.onEvent(EventLib.PlayerOnTileEvent(self.getRect()))
 
 class MyWorld(World):
-    def __init__(self):
+    def __init__(self, level):
         super().__init__()
         self._collidesWithPlayer = set()
         self._platforms = set()
         self.MAP_WIDTH = 60
         self.MAP_HEIGHT = 60
+        self.level = level
+        self.MAP_WIDTH = level.width
+        self.MAP_HEIGHT = level.height
+        self.initLevel()
+
+    def initLevel(self):
+        self.level.load(self)
 
     def addCollidesWithPlayer(self, sprite):
         self._collidesWithPlayer.add(sprite)
@@ -326,6 +328,7 @@ class MyWorld(World):
     def getIntersectingTiles(self, rect):
         return filter(lambda platform: doRectsOverlap(platform.getRect(), rect), self._platforms)
 
+
 #------------------------Wire up world------------------------------#
 # 3:2 aspect ratio. 30x20 UNITxUNIT blocks
 WIDTH = 480
@@ -340,32 +343,64 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption("NEXT 3E")
 
 assets = AssetManager()
-world = MyWorld()
-# player = SquarePlayer(world, (5, 5), (1, 1))
-panda = Panda(world, (0,0), (1,1), assets)
-squash = Squash(world, (2,5), (1,1), assets)
 
-world.addPlayer(panda)
-world.addEntity(squash)
+
+def grass_func(world, pos):
+    # player = Player(world, pos, (50, 75))
+    # world.addPlayer(player)
+    print("Adding grass", pos)
+    grass = SquareTile(world, pos, (1,1))
+    world.addEntity(grass)
+    world._platforms.add(grass)
+def enemy_func(world, pos):
+    pass
+
+def spike_func(world, pos):
+    pass
+
+def empty_func(world, pos):
+    pass
+
+def player_func(world, pos):
+    panda = Panda(world, pos, (1,1), assets)
+    world.addPlayer(panda)
+level_mapping = {
+    (0, 255, 0): grass_func,
+    (255, 0, 0): enemy_func,
+    (0, 0, 255): spike_func,
+    (0, 0, 0): empty_func,
+    (255, 255, 255): player_func
+}
+
+level = Level("assets/levels/demo_level.png", level_mapping)
+world = MyWorld(level)
+
+# player = SquarePlayer(world, (5, 5), (1, 1))
+# squash = Squash(world, (2,5), (1,1), assets)
+# world.addEntity(squash)
 
 cam = Camera(WIDTH, HEIGHT, WORLD_WIDTH)
 world.setCamera(cam)
+world.MAP_WIDTH = level.width
+world.MAP_HEIGHT = level.height
 
-floor = list(zip(range(0, 50), [15]*50))
+# print(level.width)
+#
+# floor = list(zip(range(0, 50), [15]*50))
+#
+# stairs = []
+# for x in range(20,25):
+#     for y in range(0, x-20):
+#         stairs.append((x,15-y))
+#
+# # print(stairs)
+#
+# floater = list(zip(range(10,20), [5]*10))
+# tiles = floor + stairs + floater
 
-stairs = []
-for x in range(20,25):
-    for y in range(0, x-20):
-        stairs.append((x,15-y))
-
-print(stairs)
-
-floater = list(zip(range(10,20), [5]*10))
-tiles = floor + stairs + floater
-
-for (x,y) in tiles:
-    squash = SquareTile(world, (x, y), (1, 1))
-    world.addEntity(squash)
-    world._platforms.add(squash)
+# for (x,y) in tiles:
+#     squash = SquareTile(world, (x, y), (1, 1))
+#     world.addEntity(squash)
+#     world._platforms.add(squash)
 
 GameLoop.runGame(world, WIDTH, HEIGHT)

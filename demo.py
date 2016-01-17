@@ -67,7 +67,7 @@ class RainDrops(Entity):
 
 
 class Player(Entity):
-    FRICTION = 2/1000.0
+    FRICTION = 10/1000.0
     FORCE = 0.05/1000.0
     COLOR_A = (255, 0, 100)
     COLOR_B = (0, 255, 170)

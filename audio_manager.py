@@ -3,7 +3,8 @@
 import pyaudio
 import wave
 import sys
-import time
+
+
 
 
 CHUNK = 1024
@@ -13,7 +14,6 @@ if len(sys.argv) < 2:
     sys.exit(-1)
 
 p = pyaudio.PyAudio()
-
 
 deviceCount = p.get_device_count()
 print("Device count:",deviceCount)
