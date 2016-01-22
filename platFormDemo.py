@@ -307,9 +307,6 @@ class SquashBulletSeed(Player):
         return (x, y, 0, 0)
 
 
-
-
-
 class Squash(Sprite):
 
     def shootBullet(self, dt):
@@ -337,9 +334,8 @@ class Squash(Sprite):
         screen.blit(self.rightAnimation.getCurrentImage(), cam.transform(self.getRect()))
 
     def onCollide(self, player):
+        self.world.doDeath(self)
         self.kill()
-
-
 
 class SquareTile(Sprite):
     def __init__(self, world, pos, dim):
@@ -397,6 +393,9 @@ class MyWorld(World):
         self.persistedCoordinates = {} #level sprites that are currently invisible
         self.spriteToLevelCoord = {}
 
+        self.deaths = {}
+
+
         self._platformGrid = {}
         self.initLevel()#this needs to be last
 
@@ -420,12 +419,12 @@ class MyWorld(World):
         for i in range(x, min(lastX + 1, self.level.width)):
             for j in range(y, min(lastY + 1, self.level.height)):
 
-                if (i,j) not in self.loadedCoordinates:
+                if (i,j) not in self.loadedCoordinates and (i,j) not in self.deaths:
 
-                    if (i, j) in self.persistedCoordinates:
-                        self.loadedCoordinates[(i,j)] = self.persistedCoordinates[(i,j)]
-                    #as long as self.loadedCoordinates[(i,j)] is not < threshold
-                    elif self.canRespawn(i, j):
+                    # if (i, j) in self.persistedCoordinates:
+                    #     self.loadedCoordinates[(i,j)] = self.persistedCoordinates[(i,j)]
+                    # #as long as self.loadedCoordinates[(i,j)] is not < threshold
+                    if self.canRespawn(i, j):
                         sprite = self.level.loadPos(self, i, j)
                         self.spriteToLevelCoord[sprite] = (i, j)
 
@@ -474,9 +473,8 @@ class MyWorld(World):
 
         for coord in coordsToUnload:
             sprite = self.loadedCoordinates[coord]
-            # if sprite:
-            #     sprite.kill()
-
+            if sprite:
+                sprite.kill()
             self.persistedCoordinates[coord] = sprite
             self.loadedCoordinates.pop(coord)
 
@@ -588,6 +586,9 @@ class MyWorld(World):
         length = max(maxLength * self._players[0].hp / maxHp, 0)
         pygame.draw.rect(screen, [0, 255, 0], [30, 10, length, 5])
 
+    def doDeath(self, entity):
+        self.deaths[self.spriteToLevelCoord[entity]] = 1
+        entity.kill()
 
 #------------------------Wire up world------------------------------#
 # 3:2 aspect ratio. 30x20 UNITxUNIT blocks

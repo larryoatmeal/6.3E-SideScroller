@@ -21,7 +21,7 @@ class Sprite(Entity):
         self.w, self.h = dim
         self.world = world
         self.image = None
-        self.MAX_SPAWN = 1 #default infinite spawn
+        self.MAX_SPAWN = -1 #default infinite spawn
         self.cleanWhenOutOfView = False
     def getCollideRect(self):
         return [self.x, self.y, self.w, self.h]
@@ -38,6 +38,9 @@ class Sprite(Entity):
 
     def update(self, dt):
         pass
+
+
+
 
     def kill(self):#removes self from world
         self.world.kill(self)
