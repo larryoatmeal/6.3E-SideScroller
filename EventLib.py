@@ -1,4 +1,5 @@
 from base_classes import *
+import collections
 
 #This is not very elegant
 #Maybe just have the default event contain a dictionary that people can put whatever into
@@ -34,3 +35,14 @@ class PlayerOnTileEvent(Event):
     def __init__(self, tileRect):
         super().__init__("PLAYER_ON_TILE_EVENT")
         self.tileRect = tileRect
+
+
+class GenericCollisionEvent:
+    key = "GENERIC_COLLISION"
+
+class DamageEvent:
+    key = "DAMAGE"
+    def __init__(self, damage):
+        self.damage = damage
+class FlinchEvent:
+    key = "FLINCH"

@@ -43,16 +43,43 @@ class Level:
     color_mapping corresponding to the color at that location, passing that
     function the pixel position and the world.
     '''
+
     def load(self, world):
         for i in range(self.width):
             for j in range(self.height):
-                color = self.color_array[i][j]
-                try:
-                    function = self.color_mapping[color]
-                    function(world, (i, j))
-                except KeyError:
-                    print('KeyError in Level.load(): Color', str(color),
-                          'does not map to a function in color_mapping.')
+                self.loadPos(world, i, j)
+                #
+                # color = self.color_array[i][j]
+                # try:
+                #     function = self.color_mapping[color]
+                #     function(world, (i, j))
+                # except KeyError:
+                #     print('KeyError in Level.load(): Color', str(color),
+                #           'does not map to a function in color_mapping.')
+    #
+    # '''
+    # Responsible for loading the entity at this position
+    # If you need to unload the sprite in a specfic
+    # '''
+    def loadPos(self, world, x, y):
+        color = self.color_array[x][y]
+        try:
+            function = self.color_mapping[color]
+            return function(world, (x, y))
+        except KeyError:
+            print('KeyError in Level.load(): Color', str(color),
+                  'does not map to a function in color_mapping.')
+            return None
+
+
+
+    def unloadPos(self, world, x, y):
+        color = self.color_array[x][y]
+
+    def getRect(self):
+        return (0, 0, self.width, self.height)
+
+
 
 if __name__ == '__main__':
     print('Testing Level.py class')

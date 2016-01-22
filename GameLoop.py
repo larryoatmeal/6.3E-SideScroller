@@ -29,6 +29,7 @@ def runGame(world, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT, caption ="NEX
         # Update world
         deltaTime = clock.get_time()
         world.update(deltaTime)
+        world.cleanup()
         # Draw world
         screen.fill([0, 0, 0])  # need to clear screen on each Draw
         # testDraw(screen)

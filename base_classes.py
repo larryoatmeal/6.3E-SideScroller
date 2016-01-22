@@ -21,7 +21,10 @@ class Sprite(Entity):
         self.w, self.h = dim
         self.world = world
         self.image = None
-
+        self.MAX_SPAWN = 1 #default infinite spawn
+        self.cleanWhenOutOfView = False
+    def getCollideRect(self):
+        return [self.x, self.y, self.w, self.h]
     def getRect(self):#lol
         return [self.x, self.y, self.w, self.h]
     def getPixelRect(self, cam):
@@ -41,8 +44,16 @@ class Sprite(Entity):
     #can change self.image to change what image is being displayed
 
 class Player(Sprite):
+    def __init__(self, world, pos, dim):
+        super().__init__(world, pos, dim)
+        self.cleanWhenOutOfView = False
+
     # def getBoundingRectangle(self):
     #   return [self.x, self.y, self.x + self.width, self.y + self.height]
+
+
+
+
     def onKeyDown(self, keyPressed):
         pass
     def onKeyUp(self, keyPressed):
@@ -79,11 +90,11 @@ class World(Entity):
         self._eventQueue = []
         self._players = [] #probably only need to deal with one, but just in case
         #YOUR OWN WORLD PARAMS HERE
-
-
         #commonly accessed parameters here
         self.player_position = None #assuming here that there is just one player
         self.camera = None
+        self.killList = list()
+        self.addlist = list() #list of functions
     #--STUDENTS CAN OVERRIDE THIS---------------------#
     # Most logic should be contained in the children of the world, not the world itself
     def world_draw(self, screen):
@@ -112,13 +123,17 @@ class World(Entity):
     def update(self, dt):
         self.notifyListeners()
         self.world_update(dt)
-        for entity in self._entities:#the entity is the key
+
+        keys = self._entities.keys()
+
+        for entity in list(self._entities):#the entity is the key
             entity.update(dt)
-        for player in self._players:
+        for player in list(self._players):
             player.update(dt)
             self.player_position = (player.x, player.y)
             if self.camera:#can add flag to change this
                 self.cameraFollowPlayer()
+
     #draw children
     def draw(self, screen):
         self.world_draw(screen)
@@ -156,6 +171,7 @@ class World(Entity):
     #register an Entity as part of this world
     def addEntity(self, entity, z = 1): #0 back, 1 middle, 2 back
         self._entities[entity] = z #doesn't really matter what the value is
+
     #remove entity from this world
     def removeEntity(self, entity):
         if entity in self._entities:
@@ -191,6 +207,19 @@ class World(Entity):
     def setCamera(self, cam):
         self.camera = cam
 
-    def kill(self, entity):
-        self._listeners.pop(entity, None)
+    def removeReferences(self, entity):
+        # print(entity)
+        # print(len(self._entities))
+        if entity in self._listeners:
+            self._listeners.remove(entity)
         self._entities.pop(entity, None)
+        # print(len(self._entities))
+
+    def kill(self, entity):
+        self.killList.append(entity)
+
+    def cleanup(self):
+        # print(self.killList)
+        for entity in self.killList:
+            self.removeReferences(entity)
+        self.killList.clear()

@@ -37,6 +37,16 @@ class Camera:
         h = rect[3] * self.pixelsPerUnit
         return Rect(x, y, w, h)
 
+    def transformPoint(self, point):
+        x = (point[0] - self.pos[0]) * self.pixelsPerUnit
+        y = (point[1] - self.pos[1]) * self.pixelsPerUnit
+        return (int(x), int(y))
+
+    def scale(self, units):
+        return int(self.pixelsPerUnit * units)
+
+    def getRect(self):
+        return (self.pos[0], self.pos[1], self.worldW, self.worldH)
 
 if __name__ == "__main__":
     print("Testing Camera.py class")
