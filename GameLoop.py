@@ -39,3 +39,35 @@ def runGame(world, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT, caption ="NEX
         clock.tick(60)  # 60 fps
 
     pygame.quit()
+
+def runWorld(world, screen):
+    # Main loop
+    keepGoing = True
+    clock = pygame.time.Clock()
+
+    while keepGoing:
+        # world = scene.getWorld()
+        # Poll for events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                keepGoing = False
+            elif event.type == pygame.KEYDOWN:
+                # handle keydown
+                world.onKeyDown(event.key)
+                if event.key == pygame.K_q:  # q
+                    keepGoing = False
+            elif event.type == pygame.KEYUP:
+                # handle keyup
+                world.onKeyUp(event.key)
+        # Update world
+        deltaTime = clock.get_time()
+        world.update(deltaTime)
+        world.cleanup()
+        # Draw world
+        screen.fill([0, 0, 0])  # need to clear screen on each Draw
+        # testDraw(screen)
+        world.draw(screen)
+        # Display
+        pygame.display.flip()
+        clock.tick(60)  # 60 fps
+

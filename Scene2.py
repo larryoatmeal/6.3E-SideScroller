@@ -5,6 +5,7 @@ import GameLoop
 import EventLib
 from level import Level
 import itertools
+from Scene import Scene
 #-------------------------------Convenience methods------------------------------
 def sign(x):
     if x >= 0:
@@ -642,66 +643,70 @@ class MyWorld(World):
 
 #------------------------Wire up world------------------------------#
 # 3:2 aspect ratio. 30x20 UNITxUNIT blocks
-WIDTH = 480
-HEIGHT = 320
+# WIDTH = 480
+# HEIGHT = 320
 
-WORLD_WIDTH = 30 #width of screen in world units
+# WORLD_WIDTH = 30 #width of screen in world units
 
-size = (WIDTH, HEIGHT)
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("NEXT 3E")
+# size = (WIDTH, HEIGHT)
+# screen = pygame.display.set_mode(size)
+# pygame.display.set_caption("NEXT 3E")
 
-assets = AssetManager()
 
-def grass_func(world, pos):
-    # player = Player(world, pos, (50, 75))
-    # world.addPlayer(player)
-    print("Adding grass", pos)
-    grass = SquareTile(world, pos, (1,1))
-    world.addEntity(grass)
-    # world._platforms.add(grass)
-    world.addPlatform(grass, pos)
-    return grass
-def enemy_func(world, pos):
-    print("Adding enemy", pos)
-    enemy = Squash(world, pos, (1,1), assets)
-    world.addEntity(enemy)
-    world.addCollidesWithPlayer(enemy)
-    world.addEnemy(enemy)
-    return enemy
+# def getAssets
 
-def spike_func(world, pos):
-    print("Adding spike", pos)
-    spike = Spike(world, pos, (1, 1), assets)
-    world.addEntity(spike)
-    world.addCollidesWithPlayer(spike)
-    return spike
 
-def empty_func(world, pos):
-    return None
 
-def player_func(world, pos):
-    panda = Panda(world, pos, (1,1), assets)
-    world.addPlayer(panda)
-    return panda
 
 def panda_leaf_func(world, pos, isLeft):
     leaf = PandaLeaf(world, pos, (1,1), isLeft)
     world.addEntity(leaf)
     world.addPlayerProjectile(leaf)
 
-level_mapping = {
-    (0, 255, 0): grass_func,
-    (0, 0, 255): enemy_func,
-    (255, 0, 0): spike_func,
-    (0, 0, 0): empty_func,
-    (255, 255, 255): player_func
-}
 
-level = Level("assets/levels/demo_level.png", level_mapping)
-world = MyWorld(level)
+class Scene2(Scene):
+    def getWorld(self):
+        assets = AssetManager()
 
-cam = Camera(WIDTH, HEIGHT, WORLD_WIDTH)
-world.setCamera(cam)
+        def grass_func(world, pos):
+            print("Adding grass", pos)
+            grass = SquareTile(world, pos, (1,1))
+            world.addEntity(grass)
+            # world._platforms.add(grass)
+            world.addPlatform(grass, pos)
+            return grass
 
-GameLoop.runGame(world, WIDTH, HEIGHT)
+        def enemy_func(world, pos):
+            print("Adding enemy", pos)
+            enemy = Squash(world, pos, (1,1), assets)
+            world.addEntity(enemy)
+            world.addCollidesWithPlayer(enemy)
+            world.addEnemy(enemy)
+            return enemy
+
+        def spike_func(world, pos):
+            print("Adding spike", pos)
+            spike = Spike(world, pos, (1, 1), assets)
+            world.addEntity(spike)
+            world.addCollidesWithPlayer(spike)
+            return spike
+
+        def empty_func(world, pos):
+            return None
+
+        def player_func(world, pos):
+            panda = Panda(world, pos, (1,1), assets)
+            world.addPlayer(panda)
+            return panda
+
+        level_mapping = {
+            (0, 255, 0): grass_func,
+            (0, 0, 255): spike_func,
+            (255, 0, 0): spike_func,
+            (0, 0, 0): empty_func,
+            (255, 255, 255): player_func
+        }
+        level = Level("assets/levels/demo_level.png", level_mapping)
+        world = MyWorld(level)
+
+        return world 

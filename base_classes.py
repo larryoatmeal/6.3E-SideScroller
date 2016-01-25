@@ -35,13 +35,8 @@ class Sprite(Entity):
             screen.blit(self.image, rect)
         else:
             pygame.draw.rect(screen, (125, 125, 125), rect)
-
     def update(self, dt):
         pass
-
-
-
-
     def kill(self):#removes self from world
         self.world.kill(self)
     #can change self.image to change what image is being displayed
@@ -53,10 +48,6 @@ class Player(Sprite):
 
     # def getBoundingRectangle(self):
     #   return [self.x, self.y, self.x + self.width, self.y + self.height]
-
-
-
-
     def onKeyDown(self, keyPressed):
         pass
     def onKeyUp(self, keyPressed):
@@ -226,3 +217,251 @@ class World(Entity):
         for entity in self.killList:
             self.removeReferences(entity)
         self.killList.clear()
+
+
+def doRectsOverlap(rect1, rect2):
+    topLeft1 = (rect1[0], rect1[1])
+    topLeft2 = (rect2[0], rect2[1])
+    bottomRight1 = (topLeft1[0] + rect1[2], topLeft1[1] + rect1[3])
+    bottomRight2 = (topLeft2[0] + rect2[2], topLeft2[1] + rect2[3])
+
+    # print(topLeft1, bottomRight1, topLeft2, bottomRight2)
+    if (topLeft1[0] > bottomRight2[0] or topLeft2[0] > bottomRight1[0]):
+        # print("HERE")
+        return False
+    if (topLeft1[1] > bottomRight2[1] or topLeft2[1] > bottomRight1[1]):
+        # print("HERE2")
+        return False
+    return True
+
+def doSpritesOverlap(sprite1, sprite2):
+    return doRectsOverlap(sprite1.getCollideRect(), sprite2.getCollideRect())
+
+def clamp(x, low, high):
+    return max(low, min(x, high))
+
+class WorldPlus(World):
+    def __init__(self, level):
+        super().__init__()
+        self._collidesWithPlayer = set()
+        self._platforms = set()
+        self._projectiles = set()
+        self.MAP_WIDTH = 60
+        self.MAP_HEIGHT = 60
+        self.level = level
+        self.MAP_WIDTH = level.width
+        self.MAP_HEIGHT = level.height
+        self.levelHolder = {}
+
+        self.playerProjectiles = set()
+        self.enemies = set()
+
+        self.loadedCoordinates = {} #level sprites that are currently visible/active
+        self.loadedCoordinatesCount = {} #number of times sprite has been respawned
+        self.persistedCoordinates = {} #level sprites that are currently invisible
+        self.spriteToLevelCoord = {}
+
+        self.deaths = {}
+        self._platformGrid = {}
+        self.initLevel()#this needs to be last
+
+    def addPlatform(self, platform, pos):
+        self._platformGrid[pos] = platform
+
+    def canRespawn(self, i, j):
+        if (i,j) in self.loadedCoordinatesCount:
+            (spawnNum, maxSpawn) = self.loadedCoordinatesCount[(i,j)]
+            if maxSpawn > 0 and spawnNum > maxSpawn: #if maxSpawn negative, infinite respawn
+                return False
+        return True
+
+    def loadLevelVisible(self, rect):
+        (x, y, w, h) = rect
+        x = max(int(x), 0) #floor
+        y = max(int(y), 0) #floor
+        lastX = int(x + w)
+        lastY = int(y + h)
+        for i in range(x, min(lastX + 1, self.level.width)):
+            for j in range(y, min(lastY + 1, self.level.height)):
+
+                if (i,j) not in self.loadedCoordinates and (i,j) not in self.deaths:
+
+                    # if (i, j) in self.persistedCoordinates:
+                    #     self.loadedCoordinates[(i,j)] = self.persistedCoordinates[(i,j)]
+                    # #as long as self.loadedCoordinates[(i,j)] is not < threshold
+                    if self.canRespawn(i, j):
+                        sprite = self.level.loadPos(self, i, j)
+                        self.spriteToLevelCoord[sprite] = (i, j)
+
+                        if sprite:
+                            self.loadedCoordinates[(i,j)] = sprite
+                            if (i,j) in self.loadedCoordinatesCount:
+                                self.loadedCoordinatesCount[(i, j)][0] += 1
+                            else:
+                                self.loadedCoordinatesCount[(i, j)] = [1, sprite.MAX_SPAWN]
+                #     if(i,j) in self.loadedCoordinatesCount:
+                #         if self.loadedCoordinates[(i,j)] < 2:
+                #             self.loadedCoordinatesCount[(i,j)] += 1
+                #             sprite = self.level.loadPos(self, i, j)
+                #             if sprite:
+                #                     self.loadedCoordinates[(i,j)] = sprite
+                #
+                #     else:
+                #         self.loadedCoordinatesCount[(i,j)] = 1
+                #         sprite = self.level.loadPos(self, i, j)
+                #
+                #         if sprite:
+                #             self.loadedCoordinates[(i,j)] = sprite
+                #
+                #
+                # if sprite:
+                #         if (i,j) in self.loadedCoordinatesCount:
+                #             # if self.loadedCoordinatesCount[(i,j)] < 2:#only load once
+                #             #     self.loadedCoordinatesCount[(i,j)] += 1
+                #             # self.loadedCoordinates[(i,j)] = sprite
+                #
+                #             self.loadedCoordinates[(i, j)] = sprite
+                #             pass
+                #         else:
+                #             self.loadedCoordinatesCount[(i,j)] = 1
+                #             self.loadedCoordinates[(i,j)] = sprite
+
+    def unloadLevelVisible(self, rect):
+        # print(self.loadedCoordinates)
+        coordsToUnload = set()
+        for (coord, sprite) in self.loadedCoordinates.items():
+            # print(coord, sprite)
+            if not doRectsOverlap(sprite.getRect(), rect):
+                print("Unloading", coord)
+                if not isinstance(sprite, Player):
+                    coordsToUnload.add(coord)
+
+        for coord in coordsToUnload:
+            sprite = self.loadedCoordinates[coord]
+            if sprite:
+                sprite.kill()
+            self.persistedCoordinates[coord] = sprite
+            self.loadedCoordinates.pop(coord)
+
+        for sprite in self._entities:
+            if sprite.cleanWhenOutOfView:
+                if not doRectsOverlap(sprite.getRect(), rect):
+                    sprite.kill()
+        # sprite.kill()
+
+# def unloadNotVisible(self, rect):
+    #     for ((x,y) in
+
+    def initLevel(self):
+        #load entire level in beginning. Will unload later
+        self.loadLevelVisible(self.level.getRect())
+
+    def addCollidesWithPlayer(self, sprite):
+        self._collidesWithPlayer.add(sprite)
+    # def addProjectile(self, sprite):
+    #     self._projectiles.add(sprite)
+
+    def addEnemy(self, enemy):
+        self.enemies.add(enemy)
+
+    def addPlayerProjectile(self, projectile):
+        self.playerProjectiles.add(projectile)
+
+    def removeFromAll(self, obj):
+        super().removeFromAll(obj)
+        self._collidesWithPlayer.remove(obj)
+
+    def cameraFollowPlayer(self):
+        self.camera.pos[0] = clamp(self.player_position[0] - self.camera.worldW/2, 0, self.MAP_WIDTH - self.camera.worldW)
+        self.camera.pos[1] = clamp(self.player_position[1] - self.camera.worldH/2, 0, self.MAP_HEIGHT - self.camera.worldH)
+
+    def getVisible(self, entities):
+        return filter(lambda entity: doRectsOverlap(entity.getRect(), self.camera.getRect()), entities)
+
+    def world_update(self, dt):
+        super().world_update(dt)
+        #handle collisions here
+
+        self.loadLevelVisible(self.camera.getRect())
+        self.unloadLevelVisible(self.camera.getRect())
+        self.camera.getRect()
+
+        # print("Loaded", len(self.loadedCoordinates))
+        # print("Entities", len(self._entities))
+
+        for player in self._players:
+            # print(player.getRect())
+            for sprite in self._collidesWithPlayer:
+                # print(sprite.getRect())
+                if doSpritesOverlap(player, sprite):
+                    # print("Collision between ", player, sprite)
+                    try:
+                        player.onCollide(sprite)
+                    except AttributeError:
+                        pass
+                    try:
+                        sprite.onCollide(player)
+                    except AttributeError:
+                        pass
+
+        for enemy in self.enemies:
+            for projectile in self.playerProjectiles:
+                if doSpritesOverlap(enemy, projectile):
+                    enemy.onCollideProjectile(projectile)
+                    projectile.onCollideEnemy(enemy)
+        # for projectile in self._projectiles:
+        #     for entity in itertools.chain(self._players, self._collidesWithPlayer):
+        #     # for entity in itertools.chain(self._platforms, self._players, self._collidesWithPlayer):
+        #         if doSpritesOverlap(projectile, entity):
+        #             projectile.onCollide(entity)
+        #             entity.onCollide(projectile)
+        #     # for tile in self._platforms:
+        #     #     if doSpritesOverlap(projectile, tile):
+        #     #         projectile.onCollide(tile)
+        #     #         tile.onCollide(projectile)
+        #     # for player in self._players:
+    #O(n) of area of rect
+    def getIntersectingPlatforms(self, rect):
+        (x, y, w, h) = rect
+        startX = int(x)
+        startY = int(y)
+        endX = int(x + w)
+        endY = int(y + h)
+        platforms = list()
+
+        for i in range(startX, endX + 1):
+            for j in range(startY, endY + 1):
+                if (i,j) in self._platformGrid:
+                    platforms.append(self._platformGrid[(i,j)])
+        return platforms
+
+    def removeReferences(self, entity):
+        super().removeReferences(entity)
+        if entity in self._collidesWithPlayer:
+            self._collidesWithPlayer.remove(entity)
+        if entity in self._platforms:
+            self._platforms.remove(entity)
+        if entity in self._projectiles:
+            self._projectiles.remove(entity)
+        if entity in self.spriteToLevelCoord:
+            coord = self.spriteToLevelCoord[entity]
+            self.loadedCoordinates.pop(coord, None)
+            self.persistedCoordinates.pop(coord, None)
+        if entity in self.playerProjectiles:
+            self.playerProjectiles.remove(entity)
+        if entity in self.enemies:
+            self.enemies.remove(entity)
+
+    def draw(self, screen):
+        super().draw(screen)
+        self.drawUI(screen)
+
+    def drawUI(self, screen):
+        maxLength = 150
+        maxHp = 100
+        length = max(maxLength * self._players[0].hp / maxHp, 0)
+        pygame.draw.rect(screen, [0, 255, 0], [30, 10, length, 5])
+
+    def doDeath(self, entity):
+        self.deaths[self.spriteToLevelCoord[entity]] = 1
+        entity.kill()

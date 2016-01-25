@@ -46,3 +46,6 @@ class DamageEvent:
         self.damage = damage
 class FlinchEvent:
     key = "FLINCH"
+    def __init__(self, impulse = [0, 0]):
+        self.impulse = impulse
+
